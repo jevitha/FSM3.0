@@ -1,5 +1,6 @@
 package edu.buffalo.cse.jive.finiteStateMachine.monitor;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 import edu.buffalo.cse.jive.finiteStateMachine.models.Context;
 import edu.buffalo.cse.jive.finiteStateMachine.models.Event;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State;
@@ -33,6 +35,7 @@ public abstract class Monitor implements Runnable {
 	private State previousState;
 	private boolean shouldConsolidateByMethod;
 	private Map<String, State> consolidatedStateMap;
+	private LinkedHashMap<String,Integer> transitionsCount;
 
 	/**
 	 * Initializes Key Fields, source, adjacency list and a dummy state
@@ -46,6 +49,7 @@ public abstract class Monitor implements Runnable {
 		this.source = source;
 		this.shouldConsolidateByMethod = shouldConsolidateByMethod;
 		this.states = new HashMap<State, Set<State>>();
+		this.transitionsCount = new LinkedHashMap<String,Integer>();
 		this.consolidatedStateMap = new LinkedHashMap<String, State>();
 		previousState = new State();
 		for (String field : getKeyFields()) {
@@ -68,6 +72,8 @@ public abstract class Monitor implements Runnable {
 			State newState = previousState.copy();
 			newState.getVector().put(event.getField(), event.getValue());
 			if (!newState.getVector().values().contains(null) && !previousState.getVector().values().contains(null)) {
+				String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
+				this.transitionsCount.merge(transition, 1, Integer::sum);
 				result = states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
 					states.put(newState, new LinkedHashSet<State>());
@@ -93,7 +99,7 @@ public abstract class Monitor implements Runnable {
 		
 	}
 	
-	
+	//add transitionsCount here also, check later
 	protected void buildConsolidatedStates() {
 		
 		this.previousState = new State();
@@ -120,10 +126,6 @@ public abstract class Monitor implements Runnable {
 			}
 			previousState = newState;
 			stateCount++;
-			
-			
-			
-			
 			
 		}		
 		
@@ -234,6 +236,10 @@ public abstract class Monitor implements Runnable {
 		this.rootState = rootState;
 	}
 
+	public LinkedHashMap<String,Integer> getTransitionsCount() {
+		return transitionsCount;
+	}
+	
 	public boolean isShouldConsolidateByMethod() {
 		return shouldConsolidateByMethod;
 	}

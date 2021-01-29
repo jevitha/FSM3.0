@@ -96,6 +96,7 @@ public class FSMPropertyChecker extends ViewPart {
 	private Button addButton;
 	private Button resetButton;
 	private Button drawButton;
+	private Button transitionCount;
 
 	private Label kvSyntax;
 	private Label kvSpace;
@@ -227,6 +228,10 @@ public class FSMPropertyChecker extends ViewPart {
 		granularity[1] = new Button(grComposite, SWT.RADIO);
 		granularity[1].setSelection(false);
 		granularity[1].setText("Method");
+		
+		transitionCount = new Button(grComposite, SWT.CHECK);
+		transitionCount.setSelection(true);
+		transitionCount.setText("Count transitions");
 
 		// Predicate abstraction composite
 		Composite paComposite = new Composite(mainComposite, SWT.NONE);
@@ -436,7 +441,7 @@ public class FSMPropertyChecker extends ViewPart {
 				if (monitor.validate(expressions)) {
 					errorText.setText("All properties satisfied.                                 ");
 				}
-				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates());
+				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), monitor.getTransitionsCount(), transitionCount.getSelection());
 				transitionBuilder.build();
 				svgGenerator.generate(transitionBuilder.getTransitions());
 				exportButton.setEnabled(true);
@@ -552,7 +557,7 @@ public class FSMPropertyChecker extends ViewPart {
 			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
 			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
 			monitor.run();
-			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates());
+			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), monitor.getTransitionsCount(), transitionCount.getSelection());
 			transitionBuilder.build();
 			svgGenerator.generate(transitionBuilder.getTransitions());
 			statusLineManager.setMessage("Finite State Model for " + kvText.getText());
