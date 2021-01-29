@@ -99,7 +99,6 @@ public abstract class Monitor implements Runnable {
 		
 	}
 	
-	//add transitionsCount here also, check later
 	protected void buildConsolidatedStates() {
 		
 		this.previousState = new State();
@@ -119,6 +118,8 @@ public abstract class Monitor implements Runnable {
 				states.put(newState, new LinkedHashSet<State>());
 				rootState = newState;
 			}else {
+				String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
+				this.transitionsCount.merge(transition, 1, Integer::sum);
 				states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
 					states.put(newState, new LinkedHashSet<State>());
