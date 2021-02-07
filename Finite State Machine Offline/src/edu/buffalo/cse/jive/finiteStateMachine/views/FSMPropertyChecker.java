@@ -97,6 +97,7 @@ public class FSMPropertyChecker extends ViewPart {
 	private Button resetButton;
 	private Button drawButton;
 	private Button transitionCount;
+	private int count;
 
 	private Label kvSyntax;
 	private Label kvSpace;
@@ -114,6 +115,15 @@ public class FSMPropertyChecker extends ViewPart {
 	private TransitionBuilder transitionBuilder;
 	private Label errorText;
 	private Monitor monitor;
+	private Button ssChkBox;
+	private Button startButton;
+	private Button prevButton;
+	private Button nextButton;
+	private Button endButton;
+	private Button startButton2;
+	private Button prevButton2;
+	private Button nextButton2;
+	private Button endButton2;
 	
 	private Button[] granularity;
 	private Label grLabel;
@@ -184,7 +194,7 @@ public class FSMPropertyChecker extends ViewPart {
 
 		// Choice composite
 		Composite evComposite = new Composite(mainComposite, SWT.NONE);
-		evComposite.setLayout(new GridLayout(10, false));
+		evComposite.setLayout(new GridLayout(11, false));
 		evComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		// attributeList = new Combo(evComposite, SWT.SIMPLE | SWT.BORDER);
@@ -209,6 +219,30 @@ public class FSMPropertyChecker extends ViewPart {
 		exportButton = new Button(evComposite, SWT.PUSH);
 		exportButton.setText("Export");
 		exportButton.setToolTipText("Exports the state diagram");
+		
+		ssChkBox = new Button(evComposite, SWT.CHECK);
+		ssChkBox.setSelection(false);
+		ssChkBox.setText("Step-by-step");
+		
+		startButton = new Button(evComposite, SWT.PUSH);
+		startButton.setText("Start");
+		startButton.setToolTipText("Start state");
+		startButton.setEnabled(false);
+		
+		prevButton = new Button(evComposite, SWT.PUSH);
+		prevButton.setText("Prev");
+		prevButton.setToolTipText("Previous state");
+		prevButton.setEnabled(false);
+		
+		nextButton = new Button(evComposite, SWT.PUSH);
+		nextButton.setText("Next");
+		nextButton.setToolTipText("Next state");
+		nextButton.setEnabled(false);
+
+		endButton = new Button(evComposite, SWT.PUSH);
+		endButton.setText(" End ");
+		endButton.setToolTipText("End state");
+		endButton.setEnabled(false);
 
 		// Granularity composite
 		Composite grComposite = new Composite(mainComposite, SWT.NONE);
@@ -278,6 +312,26 @@ public class FSMPropertyChecker extends ViewPart {
 		ev2Composite.setLayout(new GridLayout(8, false));
 		ev2Composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
+		startButton2 = new Button(ev2Composite, SWT.PUSH);
+		startButton2.setText("Start");
+		startButton2.setToolTipText("Start state");
+		startButton2.setEnabled(false);
+		
+		prevButton2 = new Button(ev2Composite, SWT.PUSH);
+		prevButton2.setText("Prev");
+		prevButton2.setToolTipText("Previous state");
+		prevButton2.setEnabled(false);
+		
+		nextButton2 = new Button(ev2Composite, SWT.PUSH);
+		nextButton2.setText("Next");
+		nextButton2.setToolTipText("Next state");
+		nextButton2.setEnabled(false);
+
+		endButton2 = new Button(ev2Composite, SWT.PUSH);
+		endButton2.setText(" End ");
+		endButton2.setToolTipText("End state");
+		endButton2.setEnabled(false);
+		
 		// Added for SVG support test
 
 		canvasLabel = new Label(ev2Composite, SWT.FILL);
@@ -359,6 +413,69 @@ public class FSMPropertyChecker extends ViewPart {
 				resetButtonAction(e);
 			}
 		});
+		
+		ssChkBox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssChkBoxAction(e);
+			}
+		});
+		
+		startButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				startButtonAction(e);
+			}
+		});
+		
+		prevButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				prevButtonAction(e);
+			}
+		});
+		
+		nextButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				nextButtonAction(e);
+			}
+		});
+		
+		endButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				endButtonAction(e);
+			}
+		});
+		
+		startButton2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				startButtonAction(e);
+			}
+		});
+		
+		prevButton2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				prevButtonAction(e);
+			}
+		});
+		
+		nextButton2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				nextButtonAction(e);
+			}
+		});
+		
+		endButton2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				endButtonAction(e);
+			}
+		});
 	}
 
 	/** Phew... */
@@ -425,6 +542,7 @@ public class FSMPropertyChecker extends ViewPart {
 	private void validateButtonAction(SelectionEvent e) {
 		errorText.setText("                                                                ");
 		try {
+			count = Integer.MAX_VALUE;
 			TemporaryDataTransporter.shouldHighlight = false;
 			TemporaryDataTransporter.F_success_states = new HashSet<State>();
 			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
@@ -441,7 +559,7 @@ public class FSMPropertyChecker extends ViewPart {
 				if (monitor.validate(expressions)) {
 					errorText.setText("All properties satisfied.                                 ");
 				}
-				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), monitor.getTransitionsCount(), transitionCount.getSelection());
+				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 				transitionBuilder.build();
 				svgGenerator.generate(transitionBuilder.getTransitions());
 				exportButton.setEnabled(true);
@@ -546,25 +664,31 @@ public class FSMPropertyChecker extends ViewPart {
 		attributeList.setText("");
 	}
 
+	private void processAction(int count) {
+		errorText.setText("                                                                ");
+		try {
+			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
+			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
+			monitor.run();
+			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
+			transitionBuilder.build();
+			svgGenerator.generate(transitionBuilder.getTransitions());
+			statusLineManager.setMessage("Finite State Model for " + kvText.getText());
+			exportButton.setEnabled(true);
+		} 
+		catch (IllegalArgumentException e1) {
+			errorText.setText(e1.getMessage());
+		}
+	}
+	
 	/**
 	 * Builds and draws the State Machine
 	 * 
 	 * @param e
 	 */
 	private void drawButtonAction(SelectionEvent e) {
-		errorText.setText("                                                                ");
-		try {
-			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
-			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
-			monitor.run();
-			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), monitor.getTransitionsCount(), transitionCount.getSelection());
-			transitionBuilder.build();
-			svgGenerator.generate(transitionBuilder.getTransitions());
-			statusLineManager.setMessage("Finite State Model for " + kvText.getText());
-			exportButton.setEnabled(true);
-		} catch (IllegalArgumentException e1) {
-			errorText.setText(e1.getMessage());
-		}
+		count = Integer.MAX_VALUE;
+		processAction(count);
 	}
 
 	/**
@@ -577,6 +701,57 @@ public class FSMPropertyChecker extends ViewPart {
 		paText.setText("");
 		propertyText.setText("");
 		errorText.setText("                                                                ");
+	}
+	
+	private void ssChkBoxAction(SelectionEvent e) {
+		if (ssChkBox.getSelection()) {
+
+			drawButton.setEnabled(false);
+			prevButton.setEnabled(false); prevButton2.setEnabled(false);
+			startButton.setEnabled(true); startButton2.setEnabled(true);
+		}
+		else {
+			drawButton.setEnabled(true);
+			startButton.setEnabled(false); startButton2.setEnabled(false);
+			prevButton.setEnabled(false); prevButton2.setEnabled(false);
+			nextButton.setEnabled(false); nextButton2.setEnabled(false);
+			endButton.setEnabled(false); endButton2.setEnabled(false);
+		}
+	}
+	
+	private void startButtonAction(SelectionEvent e) {
+		count = 0;
+		processAction(count);
+		prevButton.setEnabled(false); prevButton2.setEnabled(false);
+		nextButton.setEnabled(true); nextButton2.setEnabled(true);
+		endButton.setEnabled(true); endButton2.setEnabled(true);
+	}
+	
+	private void prevButtonAction(SelectionEvent e) {
+		if (count > 0) {
+			nextButton.setEnabled(true); nextButton2.setEnabled(true);
+		}
+		processAction(--count);
+		if (count <= 0){
+			prevButton.setEnabled(false); prevButton2.setEnabled(false);
+		}
+	}
+	
+	private void nextButtonAction(SelectionEvent e) {
+		if (count < monitor.getSeqState().size() - 1) {
+			prevButton.setEnabled(true); prevButton2.setEnabled(true);
+		}
+		processAction(++count);
+		if (count >= monitor.getSeqState().size() - 1) {
+			nextButton.setEnabled(false); nextButton2.setEnabled(false);
+		}
+	}
+	
+	private void endButtonAction(SelectionEvent e) {
+		count = monitor.getSeqState().size() - 1;
+		processAction(Integer.MAX_VALUE);
+		prevButton.setEnabled(true); prevButton2.setEnabled(true);
+		nextButton.setEnabled(false); nextButton2.setEnabled(false);
 	}
 
 	@Override

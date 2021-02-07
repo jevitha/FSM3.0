@@ -1,6 +1,6 @@
 package edu.buffalo.cse.jive.finiteStateMachine.monitor;
 
-import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
-import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 import edu.buffalo.cse.jive.finiteStateMachine.models.Context;
 import edu.buffalo.cse.jive.finiteStateMachine.models.Event;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State;
@@ -30,7 +29,8 @@ public abstract class Monitor implements Runnable {
 
 	private Set<String> keyFields;
 	private BlockingQueue<Event> source;
-	private Map<State, Set<State>> states;
+	private Map<State, Set<State>> states; //Add transition count(set<State,Integer>)
+	List<State> seqStates = new ArrayList<State>(); // Sequence of original states
 	private State rootState;
 	private State previousState;
 	private boolean shouldConsolidateByMethod;
@@ -72,13 +72,15 @@ public abstract class Monitor implements Runnable {
 			State newState = previousState.copy();
 			newState.getVector().put(event.getField(), event.getValue());
 			if (!newState.getVector().values().contains(null) && !previousState.getVector().values().contains(null)) {
-				String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
-				this.transitionsCount.merge(transition, 1, Integer::sum);
+				/*String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
+				this.transitionsCount.merge(transition, 1, Integer::sum);*/
+				seqStates.add(newState);//newly added
 				result = states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
 					states.put(newState, new LinkedHashSet<State>());
 			} else if (!newState.getVector().values().contains(null)
 					&& previousState.getVector().values().contains(null)) {
+				seqStates.add(newState);//newly added
 				states.put(newState, new LinkedHashSet<State>());
 				rootState = newState;
 			}
@@ -86,7 +88,6 @@ public abstract class Monitor implements Runnable {
 		}
 		return result;
 	}
-	
 	
 	protected void generateConsolidateEventMap(Event event) {
 		
@@ -115,11 +116,13 @@ public abstract class Monitor implements Runnable {
 			State newState = consolidatedStateMap.get(key);
 			
 			if(stateCount==0) {
+				seqStates.add(newState);
 				states.put(newState, new LinkedHashSet<State>());
 				rootState = newState;
 			}else {
-				String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
-				this.transitionsCount.merge(transition, 1, Integer::sum);
+				/*String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
+				this.transitionsCount.merge(transition, 1, Integer::sum);*/
+				seqStates.add(newState);
 				states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
 					states.put(newState, new LinkedHashSet<State>());
@@ -231,6 +234,14 @@ public abstract class Monitor implements Runnable {
 
 	public State getRootState() {
 		return rootState;
+	}
+	
+	public List<State> getSeqState() {
+		return seqStates;
+	}
+
+	public void setSeqState(List<State> seqStates) {
+		this.seqStates = seqStates;
 	}
 
 	public void setRootState(State rootState) {
