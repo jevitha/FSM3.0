@@ -10,10 +10,10 @@ package edu.buffalo.cse.jive.finiteStateMachine;
 public class FSMConstants {
 
 	public static final String TRANSITION = "\"{0}\" --> \"{1}\"";
+
+	public static final String TRANSITION_COUNT = "-> [{0}]";
 	
-	public static final String TRANSITION_COUNT = "--> [{0}]";
-	
-	public static final String TRANSITION_ARROW = "-->";
+	public static final String TRANSITION_ARROW = "->";
 	
 	public static final String START_STATE = "(*) --> \"{0}\"";
 	
@@ -34,4 +34,3 @@ public class FSMConstants {
 	public static final String END_UML = "@enduml";
 	
 }
-
