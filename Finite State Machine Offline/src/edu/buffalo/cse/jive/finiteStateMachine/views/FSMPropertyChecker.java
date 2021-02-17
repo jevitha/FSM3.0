@@ -3,9 +3,11 @@ package edu.buffalo.cse.jive.finiteStateMachine.views;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
@@ -53,6 +55,9 @@ import edu.buffalo.cse.jive.finiteStateMachine.monitor.OfflineMonitor;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.Parser;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.TopDownParser;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.expression.Expression;
+import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.value.StringValueExpression;
+import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.value.ValueExpression;
+import edu.buffalo.cse.jive.finiteStateMachine.util.FSMUtil;
 import edu.buffalo.cse.jive.finiteStateMachine.util.TemporaryDataTransporter;
 // import edu.buffalo.cse.jive.finiteStateMachine.views.FSMAbstractionGranularity.State;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State;
@@ -91,8 +96,16 @@ public class FSMPropertyChecker extends ViewPart {
 
 	private Label kvLabel;
 	private Text kvText;
-	private Label paLabel; // For predicate abstraction
-	private Text paText; // For predicate abstraction
+	private Label paLabel;
+	private Text paText;
+	
+	// For abstraction
+	private Label absLabel;
+	private Text absText;
+	private Label absSpace;
+	private Label absSyntax;
+	// For abstraction
+	
 	private Button addButton;
 	private Button resetButton;
 	private Button drawButton;
@@ -267,7 +280,6 @@ public class FSMPropertyChecker extends ViewPart {
 		transitionCount.setSelection(true);
 		transitionCount.setText("Count transitions");
 
-		// Predicate abstraction composite
 		Composite paComposite = new Composite(mainComposite, SWT.NONE);
 		paComposite.setLayout(new GridLayout(2, false));
 		paComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -280,6 +292,27 @@ public class FSMPropertyChecker extends ViewPart {
 		gd5b.widthHint = 800;
 		paText.setLayoutData(gd5b);
 
+		// Predicate abstraction
+		Composite abstractComposite = new Composite(mainComposite, SWT.NONE);
+		abstractComposite.setLayout(new GridLayout(2, false));
+		abstractComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		absLabel = new Label(abstractComposite, SWT.FILL);
+		absLabel.setText("Abstraction");
+		
+		absText = new Text(abstractComposite, SWT.BORDER|SWT.FILL);
+		GridData absGd = new GridData();
+		absGd.widthHint = 800;
+		absText.setLayoutData(absGd);
+		
+		absSpace = new Label(abstractComposite, SWT.FILL);
+		absSpace.setText("                     ");
+		
+		absSyntax = new Label(abstractComposite, SWT.FILL);
+		absSyntax.setText("Comma-separated entries each of which may be =n, <n, >n, #n, \n"
+				+ "[a:b:..:c] or left empty, e.g., =5,,>3,[2:5:8],#true,<4.17,=str");
+		// Predicate abstraction
+		
 		Composite grammarView = new Composite(mainComposite, SWT.NONE);
 		grammarView.setLayout(new GridLayout(3, false));
 		grammarView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -549,6 +582,7 @@ public class FSMPropertyChecker extends ViewPart {
 			List<Expression> expressions = null;
 			try {
 				expressions = parseExpressions(propertyText);
+				System.out.println("size "+expressions.size());
 			} catch (Exception e3) {
 				errorText.setText(e3.getMessage());
 				e3.printStackTrace();
@@ -664,12 +698,53 @@ public class FSMPropertyChecker extends ViewPart {
 		attributeList.setText("");
 	}
 
+	public void abstraction() {
+		List<State> seqStates = monitor.getSeqState();
+		String paStr = absText.getText().trim();
+		if (paStr.equals(""))
+			return;
+		
+		String[] paEntries = paStr.split(",");
+		boolean reductionFlag = false;
+		int s = 0;
+
+		while (s<seqStates.size()) {
+			List<ValueExpression> valueList = new ArrayList<>(seqStates.get(s).getVector().values());
+			List<String> keyList = new ArrayList<>(seqStates.get(s).getVector().keySet());
+			for (int k=0; k<paEntries.length && k<valueList.size(); k++) {
+				if ( !paEntries[k].trim().equals("") ) {
+					String absVal = FSMUtil.applyAbstraction(valueList.get(k).toString(), paEntries[k]);
+					if (absVal.equals("")) {
+						reductionFlag = true;
+						break;
+					}
+					else {
+						Map<String, ValueExpression> map = seqStates.get(s).getVector();
+						map.replace(keyList.get(k), new StringValueExpression(absVal));
+					}
+				}
+			}	
+			if (reductionFlag) {
+				State hState = seqStates.get(s).copy();
+				//hState.hashed = true; //check this
+				seqStates.set(s, hState);
+				reductionFlag = false;
+				s++;
+			}
+			else
+				s++;
+		}
+	}
+	
 	private void processAction(int count) {
 		errorText.setText("                                                                ");
 		try {
 			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
 			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
 			monitor.run();
+			System.out.println(monitor.getSeqState().size()+" "+monitor.getStates().size());
+			//apply abstraction here
+			abstraction();
 			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 			transitionBuilder.build();
 			svgGenerator.generate(transitionBuilder.getTransitions());
