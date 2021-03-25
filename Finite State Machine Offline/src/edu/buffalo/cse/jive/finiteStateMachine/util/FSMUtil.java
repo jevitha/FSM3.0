@@ -125,4 +125,203 @@ public class FSMUtil {
 		return value; // If nothing matches return 'value' as is - no abstraction applied
 	}
 	
+	public static Range<? extends Number> getRange(Object value) {
+		String absVal = value.toString();
+		int length = absVal.length();
+		boolean isEqualSign = false;
+		boolean isGreaterSign = false;
+		boolean isLessSign = false;
+		boolean isNotEqualSign = false;
+		
+		StringBuilder builder = new StringBuilder();
+		int i=0;
+		while(i<length && !Character.isDigit(absVal.charAt(i))) {
+			if(absVal.charAt(i)=='>')
+				isGreaterSign = true;
+			else if(absVal.charAt(i)=='<')
+				isLessSign = true;
+			else if(absVal.charAt(i)=='~')
+				isNotEqualSign = true;
+			else
+				isEqualSign = true;
+			builder.append(absVal.charAt(i));
+			i++;
+		}
+	
+		Range<Double> range = new Range<Double>();
+		double nonAbsVal = Double.parseDouble(absVal.substring(i));
+		range.setNonAbsValue(nonAbsVal);
+		if(isGreaterSign) {
+			range.setEnd(Double.MAX_VALUE);
+			if(isEqualSign)
+				range.setStart(nonAbsVal);
+			else
+				range.setStart(0.1*Math.pow(10, -292));//change to constants
+		} 
+		else if(isLessSign) {
+			range.setStart(-Double.MAX_VALUE);
+			range.setEnd(nonAbsVal);
+			if(!isEqualSign)
+				range.setExcludeValue(nonAbsVal);
+		}
+		else if(isNotEqualSign) {
+			//~ sign
+			range.setStart(-1*Double.MAX_VALUE);
+			range.setEnd(Double.MAX_VALUE);
+			range.setExcludeValue(nonAbsVal);
+		}
+		else {
+			System.out.println("iseq "+nonAbsVal);
+			range.setStart(nonAbsVal);
+			range.setEnd(nonAbsVal);
+		}
+		return range;
+	}
+	
+	public static Object shiftOperator(String op, Object value) {
+		if(op.equals("<"))
+			value = ">"+value;
+		else if(op.equals(">"))
+			value = "<"+value;
+		else if(op.equals("<="))
+			value = ">="+value;
+		else if(op.equals(">="))
+			value = "<="+value;
+		else
+			value = op+value; //= or ~
+		return value;
+	}
+	
+	public static Pair<String, Boolean> checkForOperator(String value) {
+		Pair<String, Boolean> pair = null;
+		if(value.contains("~"))
+			pair = new Pair<>(value.substring(1), Boolean.TRUE);
+		else
+			pair = new Pair<>(value, Boolean.FALSE);
+		return pair;
+	}
+	
+	public static Pair<Boolean, Boolean> check(Object value1, Object value2, String op) {
+		
+		String val1Class = value1.getClass().getSimpleName();
+		String val2Class = value2.getClass().getSimpleName();
+		
+		if(op.equals("!="))
+			op = "~"; // to be in sync with state operator for not equal to
+		Boolean isAbstraction = Boolean.TRUE;
+		Boolean propertyCheck = Boolean.FALSE;
+		if(val1Class.equals("Double") || val2Class.equals("Double")
+				|| val1Class.equals("Integer") || val2Class.equals("Integer")) {
+			/*If abstraction is not applied then directly we can compare*/
+			if(!val1Class.equals("String") 
+					&& !val2Class.equals("String"))
+			{
+				isAbstraction = Boolean.FALSE;
+				return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
+			}
+			Object rangeObject = null;
+			Object definitveObject = null;
+			boolean isFirst = false;
+			if(val1Class.equals("String")) {
+				rangeObject = value1;
+				definitveObject = value2;
+			} else {
+				rangeObject = value2;
+				definitveObject = value1;
+				isFirst = true;
+			}
+			//String classType = definitveObject.getClass().getSimpleName();
+			
+			if(isFirst)
+				definitveObject = shiftOperator(op, definitveObject);
+			else 
+				definitveObject = op+definitveObject;
+			Range<?> range1 = getRange(rangeObject);
+			Range<?> range2 = getRange(definitveObject);
+			
+			double startA = range1.getStart().doubleValue();
+			double endA = range1.getEnd().doubleValue();
+			double startB = range2.getStart().doubleValue();
+			double endB = range2.getEnd().doubleValue();
+			System.out.println("range1 start "+startA);
+			System.out.println("range1 end "+endA);
+			System.out.println("range2 start "+startB);
+			System.out.println("range2 end "+endB);
+			System.out.println((startA>=startB && startA<=endB));
+			System.out.println((endA>=startB && endA<=endB));
+			if((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) {
+				propertyCheck = true;
+				if(range1.getExcludeValue()==null && range2.getExcludeValue() != null) {
+					//state value is =0 and property is !=0
+					double excludeVal = range2.getExcludeValue().doubleValue();
+					if(startA==excludeVal || endA==excludeVal) {
+						System.out.println("yum");
+						propertyCheck = false;
+					}
+				}
+				else if(range1.getExcludeValue() != null && range2.getExcludeValue() != null) {
+					//~ in state value and != in given property value
+					double excludeVal1 = range1.getExcludeValue().doubleValue();
+					double excludeVal2 = range2.getExcludeValue().doubleValue();
+					if(excludeVal1 != excludeVal2) {
+						System.out.println("prop");
+						propertyCheck = false;
+					}
+				}
+			}
+			else if (!(startA>=startB && startA<=endB) && !(endA>=startB && endA<=endB)) {
+				propertyCheck = false;
+			}
+			else
+				throw new IllegalArgumentException("Property match is invalid for this abstraction, remove abstraction and check on full states");
+			
+			return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
+		}
+		else if(val1Class.equals("String") && val2Class.equals("String")) {
+			System.out.println("yup");
+			if(!value1.toString().contains("~") 
+					&& !value2.toString().contains("~"))
+			{
+				isAbstraction = Boolean.FALSE;
+				return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
+			}
+			System.out.println("venu");
+			/*If abstraction is applied on string it will be 
+			=(this is usually ignored in state value) or !=(i.e ~)*/
+			String val1Str = value1.toString();
+			String val2Str = value2.toString();
+			Pair<String, Boolean> pair1 = checkForOperator(val1Str);
+			val1Str = pair1.getLeft();
+			boolean val1Op = pair1.getRight();
+			Pair<String, Boolean> pair2 = checkForOperator(val2Str);
+			val2Str = pair2.getLeft();
+			boolean val2Op = pair2.getRight();
+			
+			if(val1Str.equals(val2Str)) {
+				if(!val1Op && !val2Op) {
+					if(op.equals("="))
+						propertyCheck = true;
+					else
+						propertyCheck = false;
+				} else {
+					if(op.equals("="))
+						propertyCheck = false;
+					else
+					 	propertyCheck = true;
+				}
+			} else {
+				if(!val1Op && !val2Op) {
+					if(op.equals("="))
+						propertyCheck = false;
+					else
+						propertyCheck = true;
+				} else
+					throw new IllegalArgumentException("Property match is invalid for this abstraction, remove abstraction and check on full states");
+			}
+			
+			return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
+		}
+		throw new IllegalArgumentException("Type mismatch in properties");
+	}
+	
 }

@@ -31,6 +31,7 @@ public abstract class ValueExpression extends Expression implements Comparable<V
 
 	public void setValue(Object value) {
 		this.value = value;
+		//System.out.println(this.value);
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public abstract class ValueExpression extends Expression implements Comparable<V
 		}
 		throw new IllegalArgumentException("Type mismatch in properties");
 	}
-
+	
 	public Object add(ValueExpression valueExpression) {
 		Object value1 = this.getValue();
 		Object value2 = valueExpression.getValue();

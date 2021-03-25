@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
@@ -47,6 +51,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
+import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 import edu.buffalo.cse.jive.finiteStateMachine.models.Event;
 import edu.buffalo.cse.jive.finiteStateMachine.models.InputFileParser;
 import edu.buffalo.cse.jive.finiteStateMachine.models.TransitionBuilder;
@@ -330,8 +335,11 @@ public class FSMPropertyChecker extends ViewPart {
 		Composite errorComposite = new Composite(mainComposite, SWT.NONE);
 		errorComposite.setLayout(new GridLayout(1, false));
 		errorText = new Label(errorComposite, SWT.NONE);
+		GridData errorGD = new GridData();
+		errorGD.widthHint = 800;
 		errorText.setText("                                                                ");
-
+		errorText.setLayoutData(errorGD);
+		
 		// Image composite
 
 		imageComposite = new Composite(mainComposite, SWT.NONE);
@@ -560,6 +568,11 @@ public class FSMPropertyChecker extends ViewPart {
 	 */
 	private List<Expression> parseExpressions(Text propertyText) throws Exception {
 		if (propertyText != null && propertyText.getText().length() > 0) {
+			Pattern p = Pattern.compile(FSMConstants.REGEX);
+		    Matcher m = p.matcher(propertyText.getText()); 
+		    if(m.find()) {
+		    	throw new IllegalArgumentException("The properties does not comply with abstraction");
+		    }
 			Parser parser = new TopDownParser();
 			String properties = propertyText.getText().trim();
 			return parser.parse(properties.split(";"));
@@ -589,10 +602,26 @@ public class FSMPropertyChecker extends ViewPart {
 			}
 			if (expressions != null && expressions.size() > 0) {
 				monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
+				System.out.println("oksize1 "+monitor.getStates().size());
 				monitor.run();
+				System.out.println("oksize2 "+monitor.getStates().size());
+				abstraction();//check this
+				System.out.println(monitor.getSeqState().toString());
+				System.out.println("oksize3 "+monitor.getStates().size());
+				
+				//validation
 				if (monitor.validate(expressions)) {
 					errorText.setText("All properties satisfied.                                 ");
 				}
+				
+				/*for(Map.Entry<State,Set<State>> entry : monitor.getStates().entrySet()) {
+					System.out.println(entry.getKey().getVector().toString()+" "+entry.getKey().getStatus());
+				}
+				System.out.println("seqstate");
+				for(State state : monitor.getSeqState()) {
+					System.out.println(state.getVector().toString()+" "+state.getStatus());
+				}*/
+				
 				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 				transitionBuilder.build();
 				svgGenerator.generate(transitionBuilder.getTransitions());
@@ -698,8 +727,34 @@ public class FSMPropertyChecker extends ViewPart {
 		attributeList.setText("");
 	}
 
+	protected void validateAbstractedState() {
+		monitor.setStates(new HashMap<>());
+		List<State> seqStates = monitor.getSeqState();
+		int s = 0;
+		monitor.setStates(new HashMap<>());
+		State previousState = monitor.getRootState();
+		Map<State, Set<State>> states = new LinkedHashMap<>();
+		
+		while (s<seqStates.size()) {
+			State newState = seqStates.get(s);
+			if(s==0) {
+				states.put(newState, new LinkedHashSet<State>());
+				monitor.setRootState(newState);
+			} else {
+				states.get(previousState).add(newState);
+				if (!states.containsKey(newState))
+					states.put(newState, new LinkedHashSet<State>());
+			}
+			previousState = newState;
+			s++;
+		}
+		
+		monitor.setStates(states);
+	}
+	
 	public void abstraction() {
 		List<State> seqStates = monitor.getSeqState();
+		System.out.println(monitor.getSeqState().get(2));
 		String paStr = absText.getText().trim();
 		if (paStr.equals(""))
 			return;
@@ -719,8 +774,16 @@ public class FSMPropertyChecker extends ViewPart {
 						break;
 					}
 					else {
-						Map<String, ValueExpression> map = seqStates.get(s).getVector();
-						map.replace(keyList.get(k), new StringValueExpression(absVal));
+						if(s!=0) {
+							Map<String, ValueExpression> map = seqStates.get(s).getVector();
+							map.put(keyList.get(k), new StringValueExpression(absVal));
+						} else {
+							State initial = seqStates.get(s).copy();
+							Map<String, ValueExpression> map = initial.getVector();
+							map.put(keyList.get(k), new StringValueExpression(absVal));
+							seqStates.set(0, initial);
+							//monitor.getRootState().getVector().put(keyList.get(k), new StringValueExpression(absVal));
+						}
 					}
 				}
 			}	
@@ -734,6 +797,8 @@ public class FSMPropertyChecker extends ViewPart {
 			else
 				s++;
 		}
+		validateAbstractedState();
+		System.out.println(monitor.getSeqState().get(2));
 	}
 	
 	private void processAction(int count) {
@@ -743,7 +808,7 @@ public class FSMPropertyChecker extends ViewPart {
 			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
 			monitor.run();
 			System.out.println(monitor.getSeqState().size()+" "+monitor.getStates().size());
-			//apply abstraction here
+			//apply abstraction here, for validatebuttonaction check to add this or not
 			abstraction();
 			transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 			transitionBuilder.build();

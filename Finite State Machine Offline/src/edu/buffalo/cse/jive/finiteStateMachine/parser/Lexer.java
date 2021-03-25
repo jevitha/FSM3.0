@@ -94,6 +94,7 @@ public class Lexer {
 			nextToken = Token.INT_LIT; // intValue would be set
 		} else {
 			nextChar = ch;
+			System.out.println("else enna ch "+ch);
 			switch (ch) {
 			case '\'':
 				nextToken = Token.PRIME_OP;
@@ -172,12 +173,16 @@ public class Lexer {
 					nextToken = Token.LESSER_OP;
 				break;
 			case '>':
+				System.out.println("prevToken "+nextToken);
+				System.out.println(ch);
 				ch = buffer.getChar();
+				System.out.println(ch);
 				if (ch == '=') {
 					nextToken = Token.GREATEREQ_OP;
 					ch = buffer.getChar();
 				} else
 					nextToken = Token.GREATER_OP;
+				System.out.println(nextToken);
 				break;
 			case '!':
 				ch = buffer.getChar();
@@ -222,6 +227,7 @@ public class Lexer {
 				ch = buffer.getChar();
 				break;
 			case '[':
+				System.out.println("leftbox");
 				nextToken = Token.LEFT_BOX;
 				ch = buffer.getChar();
 				break;
@@ -260,8 +266,10 @@ public class Lexer {
 		ident = "";
 		do {
 			ident = ident + ch;
+			System.out.println("ooh"+ident+"ok");
 			ch = buffer.getChar();
 		} while (Character.isLetter(ch) || Character.isDigit(ch) || ch == '\"' || ch == '_' || ch == '.' || ch == ':');
+		System.out.println("identvenu "+ident);
 		return ident;
 	}
 	

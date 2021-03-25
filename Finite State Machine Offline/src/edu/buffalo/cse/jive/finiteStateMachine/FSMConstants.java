@@ -33,4 +33,6 @@ public class FSMConstants {
 	
 	public static final String END_UML = "@enduml";
 	
+	public static final String REGEX = "[a-zA-Z']+\\s+(>|<|>=|<=|==)\\s+[a-zA-Z']+";
+	
 }

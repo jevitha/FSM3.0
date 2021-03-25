@@ -61,7 +61,7 @@ public class TransitionBuilder {
 		else if (status.equals(Status.VALID_A))//check the if conditions later
 			addColorTransition(transition, FSMConstants.LIGHT_SKY_BLUE_COLOR);
 		else 
-			addColorTransition(transition, FSMConstants.RED_COLOR);
+			addColorTransition(transition, FSMConstants.GREEN_COLOR);
 		this.transitions.append(transition.toString());
 		addNewLine();
 	}
@@ -103,6 +103,7 @@ public class TransitionBuilder {
 	}
 
 	public void build() {
+		//addInitialState(seqStates.get(0), rootState.getStatus());//changed rootstate to seqstates.get(0)
 		addInitialState(rootState, rootState.getStatus());
 		buildTransitions(seqStates);
 	}

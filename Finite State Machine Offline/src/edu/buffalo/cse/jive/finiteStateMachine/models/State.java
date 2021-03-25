@@ -39,6 +39,7 @@ public class State {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String key : vector.keySet()) {
+			//System.out.println("enna length "+vector.get(key).toString().length());
 			stringBuilder.append(vector.get(key));
 			stringBuilder.append(",");
 		}
