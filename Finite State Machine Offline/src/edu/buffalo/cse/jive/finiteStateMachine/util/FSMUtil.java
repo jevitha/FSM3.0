@@ -1,5 +1,7 @@
 package edu.buffalo.cse.jive.finiteStateMachine.util;
 
+import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
+
 public class FSMUtil {
 
 	public static String applyAbstraction(String value, String predicate) {
@@ -125,8 +127,20 @@ public class FSMUtil {
 		return value; // If nothing matches return 'value' as is - no abstraction applied
 	}
 	
+	public static Range<? extends Number> getRangeAbstraction(String absVal) {
+		String[] arrRange = absVal.split(":");
+		Range<Double> range = new Range<Double>();
+		range.setStart(Double.parseDouble(arrRange[0]));
+		range.setEnd(Double.parseDouble(arrRange[1])-(0.1*Math.pow(10, -10)));
+		return range;
+	}
+	
 	public static Range<? extends Number> getRange(Object value) {
 		String absVal = value.toString();
+		if(absVal.contains(":")) {
+			//For Range abstraction values like [0:2]
+			return getRangeAbstraction(absVal);
+		}
 		int length = absVal.length();
 		boolean isEqualSign = false;
 		boolean isGreaterSign = false;
@@ -156,13 +170,15 @@ public class FSMUtil {
 			if(isEqualSign)
 				range.setStart(nonAbsVal);
 			else
-				range.setStart(0.1*Math.pow(10, -292));//change to constants
+				range.setStart(nonAbsVal+(0.1*Math.pow(10, -10)));//change to constants
 		} 
 		else if(isLessSign) {
 			range.setStart(-Double.MAX_VALUE);
-			range.setEnd(nonAbsVal);
-			if(!isEqualSign)
-				range.setExcludeValue(nonAbsVal);
+			if(isEqualSign)
+				range.setEnd(nonAbsVal);
+			else {
+				range.setEnd(nonAbsVal-(0.1*Math.pow(10, -10)));
+			}
 		}
 		else if(isNotEqualSign) {
 			//~ sign
@@ -249,6 +265,13 @@ public class FSMUtil {
 			System.out.println("range2 end "+endB);
 			System.out.println((startA>=startB && startA<=endB));
 			System.out.println((endA>=startB && endA<=endB));
+			/*
+			 * the first if and else if, solves all the case for equal to and negation
+			 * r!=0 -> r=0 (else if case)
+			 * r!=0 -> r!=0 (if case)
+			 * r=0 -> r!=0 (if case)
+			 * r=0 -> r=0 (if case)
+			 */
 			if((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) {
 				propertyCheck = true;
 				if(range1.getExcludeValue()==null && range2.getExcludeValue() != null) {
@@ -273,7 +296,7 @@ public class FSMUtil {
 				propertyCheck = false;
 			}
 			else
-				throw new IllegalArgumentException("Property match is invalid for this abstraction, remove abstraction and check on full states");
+				throw new IllegalArgumentException(FSMConstants.INVALID_ABSTRACTION_MSG);
 			
 			return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
 		}
@@ -316,7 +339,7 @@ public class FSMUtil {
 					else
 						propertyCheck = true;
 				} else
-					throw new IllegalArgumentException("Property match is invalid for this abstraction, remove abstraction and check on full states");
+					throw new IllegalArgumentException(FSMConstants.INVALID_ABSTRACTION_MSG);
 			}
 			
 			return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);

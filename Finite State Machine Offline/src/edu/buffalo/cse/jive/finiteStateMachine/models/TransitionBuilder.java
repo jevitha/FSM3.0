@@ -77,6 +77,8 @@ public class TransitionBuilder {
 			addColorTransition(transition, FSMConstants.RED_COLOR);
 		else if (status.equals(Status.VALID_A))
 			addColorTransition(transition, FSMConstants.LIGHT_SKY_BLUE_COLOR);
+		else if(status.equals(Status.INVALID_ABSTRACTION))
+			addColorTransition(transition, FSMConstants.ORANGE_COLOR);
 		else if (TemporaryDataTransporter.F_success_states.contains(state2))
 			addColorTransition(transition, FSMConstants.LIME_GREEN_COLOR);
 		return transition.toString();

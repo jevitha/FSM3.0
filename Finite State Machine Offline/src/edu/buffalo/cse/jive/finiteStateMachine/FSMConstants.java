@@ -23,6 +23,8 @@ public class FSMConstants {
 	
 	public static final String LIME_GREEN_COLOR = "LimeGreen";
 	
+	public static final String ORANGE_COLOR = "Orange";
+	
 	public static final String GREEN_COLOR = "Green";
 	
 	public static final String SPACE_HASH = " #";
@@ -34,5 +36,7 @@ public class FSMConstants {
 	public static final String END_UML = "@enduml";
 	
 	public static final String REGEX = "[a-zA-Z']+\\s+(>|<|>=|<=|==)\\s+[a-zA-Z']+";
+	
+	public static final String INVALID_ABSTRACTION_MSG = "Property checking is not applicable for this abstraction";
 	
 }

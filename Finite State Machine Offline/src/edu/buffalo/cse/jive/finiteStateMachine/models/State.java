@@ -27,7 +27,8 @@ public class State {
 		VALID,
 		INVALID,
 		VALID_A,      
-		INVALID_A
+		INVALID_A,
+		INVALID_ABSTRACTION
 	}
 
 	public State() {

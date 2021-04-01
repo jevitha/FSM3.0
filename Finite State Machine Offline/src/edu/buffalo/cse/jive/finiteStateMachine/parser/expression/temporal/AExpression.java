@@ -10,6 +10,7 @@ import edu.buffalo.cse.jive.finiteStateMachine.models.State;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State.Status;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.expression.Expression;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.expression.UnaryExpression;
+import edu.buffalo.cse.jive.finiteStateMachine.views.FSMPropertyChecker;
 
 /**
  * @author Bharat Jayaraman
@@ -40,14 +41,24 @@ public class AExpression extends UnaryExpression<Expression> {
 	 */
 	private Boolean evaluate(State prev, State curr, Set<State> visited, Map<State, Set<State>> states) {
 		boolean currentResult = true;
+		boolean invalidAbstraction = false;
 		if (!states.get(curr).isEmpty()) {
 			for (State next : states.get(curr)) {
-				currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
+				try {
+					currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
+				} catch(IllegalArgumentException ex) {
+					invalidAbstraction = true;
+					FSMPropertyChecker.errorText.setText(ex.getMessage());
+				}
 			}
 		} 
 		//else { currentResult = getExpression().evaluate(new Context(curr, null, states)) && currentResult;}
-		if(currentResult)curr.setStatus(Status.VALID_A);
-		else curr.setStatus(Status.VALID);
+		if(invalidAbstraction)
+			curr.setStatus(Status.INVALID_ABSTRACTION);
+		else if(currentResult)
+			curr.setStatus(Status.VALID_A);
+		else 
+			curr.setStatus(Status.VALID);
 		if (visited.add(curr)) {
 			for (State next : states.get(curr)) {
 				currentResult = evaluate(curr, next, visited, states) && currentResult;

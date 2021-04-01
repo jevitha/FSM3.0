@@ -83,7 +83,8 @@ public class FSMPropertyChecker extends ViewPart {
 	 * The ID of the view as specified by the extension.
 	 */
 	public static final String ID = "edu.buffalo.cse.jive.finiteStateMachine.views.FiniteStateMachine";
-
+	public static Label errorText;
+	
 	private IStatusLineManager statusLineManager;
 	private Display display;
 	private ScrolledComposite rootScrollComposite;
@@ -131,7 +132,7 @@ public class FSMPropertyChecker extends ViewPart {
 	private BlockingQueue<Event> incomingEvents;
 	private SvgGenerator svgGenerator;
 	private TransitionBuilder transitionBuilder;
-	private Label errorText;
+	//private Label errorText;
 	private Monitor monitor;
 	private Button ssChkBox;
 	private Button startButton;

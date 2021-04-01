@@ -12,6 +12,7 @@ import edu.buffalo.cse.jive.finiteStateMachine.models.State;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State.Status;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.expression.Expression;
 import edu.buffalo.cse.jive.finiteStateMachine.parser.expression.expression.UnaryExpression;
+import edu.buffalo.cse.jive.finiteStateMachine.views.FSMPropertyChecker;
 
 /**
  * @author Shashank Raghunath
@@ -42,17 +43,27 @@ public class GExpression extends UnaryExpression<Expression> {
 	 */
 	private Boolean evaluate(State prev, State curr, Set<State> visited, Map<State, Set<State>> states) {
 		boolean currentResult = true;
+		boolean invalidAbstraction = false;
 		System.out.println("evaluate");
 		if (!states.get(curr).isEmpty()) {
 			for (State next : states.get(curr)) {
 				System.out.println("before states "+curr.toString()+" "+next.toString());
-				currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
+				try {
+					currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
+				} catch(IllegalArgumentException ex) {
+					invalidAbstraction = true;
+					FSMPropertyChecker.errorText.setText(ex.getMessage());
+				}
 			}
 		} 
 		//else { currentResult = getExpression().evaluate(new Context(curr, null, states)) && currentResult;}
 		System.out.println("wat status "+currentResult);
-		if(currentResult)curr.setStatus(Status.VALID);
-		else curr.setStatus(Status.INVALID);
+		if(invalidAbstraction)
+			curr.setStatus(Status.INVALID_ABSTRACTION);
+		else if(currentResult)
+			curr.setStatus(Status.VALID);
+		else
+			curr.setStatus(Status.INVALID);
 		if (visited.add(curr)) {
 			for (State next : states.get(curr)) {
 				System.out.println("states "+curr.toString()+" "+next.toString());
