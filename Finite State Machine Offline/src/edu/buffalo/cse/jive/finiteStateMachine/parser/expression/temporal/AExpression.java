@@ -48,17 +48,19 @@ public class AExpression extends UnaryExpression<Expression> {
 					currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
 				} catch(IllegalArgumentException ex) {
 					invalidAbstraction = true;
+					currentResult = false;
 					FSMPropertyChecker.errorText.setText(ex.getMessage());
 				}
 			}
 		} 
 		//else { currentResult = getExpression().evaluate(new Context(curr, null, states)) && currentResult;}
-		if(invalidAbstraction)
-			curr.setStatus(Status.INVALID_ABSTRACTION);
-		else if(currentResult)
+		if(currentResult)
 			curr.setStatus(Status.VALID_A);
-		else 
+		else {
 			curr.setStatus(Status.VALID);
+			if(invalidAbstraction)
+				curr.setStatus(Status.INVALID_ABSTRACTION);
+		}
 		if (visited.add(curr)) {
 			for (State next : states.get(curr)) {
 				currentResult = evaluate(curr, next, visited, states) && currentResult;

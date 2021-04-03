@@ -52,18 +52,20 @@ public class GExpression extends UnaryExpression<Expression> {
 					currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
 				} catch(IllegalArgumentException ex) {
 					invalidAbstraction = true;
+					currentResult = false;
 					FSMPropertyChecker.errorText.setText(ex.getMessage());
 				}
 			}
 		} 
 		//else { currentResult = getExpression().evaluate(new Context(curr, null, states)) && currentResult;}
 		System.out.println("wat status "+currentResult);
-		if(invalidAbstraction)
-			curr.setStatus(Status.INVALID_ABSTRACTION);
-		else if(currentResult)
+		if(currentResult)
 			curr.setStatus(Status.VALID);
-		else
+		else {
 			curr.setStatus(Status.INVALID);
+			if(invalidAbstraction)
+				curr.setStatus(Status.INVALID_ABSTRACTION);
+		}
 		if (visited.add(curr)) {
 			for (State next : states.get(curr)) {
 				System.out.println("states "+curr.toString()+" "+next.toString());
