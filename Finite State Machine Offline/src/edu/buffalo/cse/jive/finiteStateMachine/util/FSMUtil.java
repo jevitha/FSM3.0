@@ -2,6 +2,10 @@ package edu.buffalo.cse.jive.finiteStateMachine.util;
 
 import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 
+/*
+* @author Venugopal CG
+* @email vchintha@buffalo.edu
+*/
 public class FSMUtil {
 
 	public static String applyAbstraction(String value, String predicate) {
@@ -272,7 +276,8 @@ public class FSMUtil {
 			 * r=0 -> r!=0 (if case)
 			 * r=0 -> r=0 (if case)
 			 */
-			if((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) {
+			if(((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) 
+					|| ((startB>=startA && startB<=endA) && (endB>=startA && endB<=endA))) {
 				propertyCheck = true;
 				if(range1.getExcludeValue()==null && range2.getExcludeValue() != null) {
 					//state value is =0 and property is !=0

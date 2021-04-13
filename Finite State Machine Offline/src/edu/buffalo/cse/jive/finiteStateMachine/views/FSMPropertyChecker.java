@@ -569,11 +569,6 @@ public class FSMPropertyChecker extends ViewPart {
 	 */
 	private List<Expression> parseExpressions(Text propertyText) throws Exception {
 		if (propertyText != null && propertyText.getText().length() > 0) {
-			Pattern p = Pattern.compile(FSMConstants.REGEX);
-		    Matcher m = p.matcher(propertyText.getText()); 
-		    if(m.find()) {
-		    	throw new IllegalArgumentException("The properties does not comply with abstraction");
-		    }
 			Parser parser = new TopDownParser();
 			String properties = propertyText.getText().trim();
 			return parser.parse(properties.split(";"));
@@ -759,6 +754,14 @@ public class FSMPropertyChecker extends ViewPart {
 		String paStr = absText.getText().trim();
 		if (paStr.equals(""))
 			return;
+		
+		//If abstraction is given and in the property any future variable is present like a'
+		//then we can't do abstraction on that
+		Pattern p = Pattern.compile(FSMConstants.REGEX);
+	    Matcher m = p.matcher(propertyText.getText()); 
+	    if(m.find()) {
+	    	throw new IllegalArgumentException("The property does not comply with abstraction, remove future variable in property");
+	    }
 		
 		String[] paEntries = paStr.split(",");
 		boolean reductionFlag = false;
