@@ -132,7 +132,7 @@ public class FSMPropertyChecker extends ViewPart {
 	private BlockingQueue<Event> incomingEvents;
 	private SvgGenerator svgGenerator;
 	private TransitionBuilder transitionBuilder;
-	//private Label errorText;
+
 	private Monitor monitor;
 	private Button ssChkBox;
 	private Button startButton;
@@ -538,21 +538,19 @@ public class FSMPropertyChecker extends ViewPart {
 				keyAttributes.add(attribute.trim());
 			}
 
+			String[] attrArray = new String[keyAttributes.size()];
+			attrArray = keyAttributes.toArray(attrArray);
 			if (abbreviations != null && abbreviations.getText().length() > 0) {
 				Event.abbreviations.clear();
 				String[] tokens = abbreviations.getText().split(",");
 				if (tokens == null || tokens.length == 0)
 					throw new IllegalArgumentException("Invalid Abbreviations");
-				for (String abbreviation : tokens) {
-					String[] tks = abbreviation.split("=");
-					if (tks == null || tks.length != 2)
+				for (int i=0;i<tokens.length;i++) {
+					String abbreviation = tokens[i];
+					if(abbreviation.isEmpty() || abbreviation.length()==0)
 						throw new IllegalArgumentException("Invalid Abbreviations");
-					String attribute = tks[0].trim();
-					if (keyAttributes.contains(attribute)) {
-						Event.abbreviations.put(attribute, tks[1].trim());
-					} else {
-						throw new IllegalArgumentException("Invalid Abbreviations");
-					}
+					String term = abbreviation.trim();
+					Event.abbreviations.put(attrArray[i], term);
 				}
 			}
 			return keyAttributes;
@@ -591,32 +589,19 @@ public class FSMPropertyChecker extends ViewPart {
 			List<Expression> expressions = null;
 			try {
 				expressions = parseExpressions(propertyText);
-				System.out.println("size "+expressions.size());
 			} catch (Exception e3) {
 				errorText.setText(e3.getMessage());
 				e3.printStackTrace();
 			}
 			if (expressions != null && expressions.size() > 0) {
 				monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
-				System.out.println("oksize1 "+monitor.getStates().size());
 				monitor.run();
-				System.out.println("oksize2 "+monitor.getStates().size());
-				abstraction();//check this
-				System.out.println(monitor.getSeqState().toString());
-				System.out.println("oksize3 "+monitor.getStates().size());
+				abstraction();
 				
 				//validation
 				if (monitor.validate(expressions)) {
 					errorText.setText("All properties satisfied.                                 ");
 				}
-				
-				/*for(Map.Entry<State,Set<State>> entry : monitor.getStates().entrySet()) {
-					System.out.println(entry.getKey().getVector().toString()+" "+entry.getKey().getStatus());
-				}
-				System.out.println("seqstate");
-				for(State state : monitor.getSeqState()) {
-					System.out.println(state.getVector().toString()+" "+state.getStatus());
-				}*/
 				
 				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 				transitionBuilder.build();
@@ -750,7 +735,6 @@ public class FSMPropertyChecker extends ViewPart {
 	
 	public void abstraction() {
 		List<State> seqStates = monitor.getSeqState();
-		System.out.println(monitor.getSeqState().get(2));
 		String paStr = absText.getText().trim();
 		if (paStr.equals(""))
 			return;
@@ -760,7 +744,7 @@ public class FSMPropertyChecker extends ViewPart {
 		Pattern p = Pattern.compile(FSMConstants.REGEX);
 	    Matcher m = p.matcher(propertyText.getText()); 
 	    if(m.find()) {
-	    	throw new IllegalArgumentException("The property does not comply with abstraction, remove future variable in property");
+	    	throw new IllegalArgumentException("The primed variable inside Property is not compatible with Abstraction");
 	    }
 		
 		String[] paEntries = paStr.split(",");
@@ -802,7 +786,6 @@ public class FSMPropertyChecker extends ViewPart {
 				s++;
 		}
 		validateAbstractedState();
-		System.out.println(monitor.getSeqState().get(2));
 	}
 	
 	private void processAction(int count) {

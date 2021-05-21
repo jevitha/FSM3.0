@@ -68,7 +68,6 @@ public class TopDownParser implements Parser {
 	public List<Expression> parse(String[] inputs) throws Exception {
 		List<Expression> expressions = new ArrayList<Expression>();
 		for (String input : inputs) {
-			System.out.println(input);
 			Expression expression = new ExpressionFactory(new Lexer(input + ";")).getExpression();
 			if (!expression.isEvaluatable())
 				throw new IllegalArgumentException("Syntax Error in Properties");
@@ -89,11 +88,8 @@ class ExpressionFactory {
 	}
 
 	public Expression getExpression() throws Exception {
-		System.out.println("first");
 		lexer.lex();
-		System.out.println("second");
 		Imply imply = new Imply(lexer);
-		System.out.println("third");
 		expression = imply.getExpression();
 		if (expression == null) {
 			throw new IllegalArgumentException("Syntax Error in Properties");
@@ -116,10 +112,8 @@ class Imply {
 
 	public Imply(Lexer lexer) throws Exception {
 		Or e1, e2;
-		System.out.println("yes");
 		e1 = new Or(lexer);
 		expression = e1.getExpression();
-		System.out.println("nexttoken "+lexer.getNextToken());
 		if (lexer.getNextToken() == Token.IMPLY_OP) {
 			lexer.lex();
 			e2 = new Or(lexer);
@@ -199,7 +193,6 @@ class BF {
 	public BF(Lexer lexer) throws Exception {
 		Imply e;
 		Rel r;
-		System.out.println(lexer.getNextToken());
 		switch (lexer.getNextToken()) {
 		
 		case Token.FOR:    /*  FOR(N, Expr:Expr, Imply) */
@@ -342,7 +335,6 @@ class BF {
 			expression = new FExpression(e.getExpression());
 			break;
 		case Token.G_OP: // G
-			System.out.println("G_OP");
 			lexer.lex(); // skip over 'G'
 			if (lexer.getNextToken() != Token.LEFT_BOX)
 				throw new IllegalArgumentException("Syntax Error in Properties");

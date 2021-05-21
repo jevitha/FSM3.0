@@ -72,16 +72,15 @@ public abstract class Monitor implements Runnable {
 			State newState = previousState.copy();
 			newState.getVector().put(event.getField(), event.getValue());
 			if (!newState.getVector().values().contains(null) && !previousState.getVector().values().contains(null)) {
-				seqStates.add(newState);//newly added
+				seqStates.add(newState);
 				result = states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
 					states.put(newState, new LinkedHashSet<State>());
 			} else if (!newState.getVector().values().contains(null)
 					&& previousState.getVector().values().contains(null)) {
-				seqStates.add(newState);//newly added
+				seqStates.add(newState);
 				states.put(newState, new LinkedHashSet<State>());
 				rootState = newState;
-				System.out.println("rootstate "+rootState.getVector().values());
 			}
 			previousState = newState;
 		}
@@ -119,8 +118,6 @@ public abstract class Monitor implements Runnable {
 				states.put(newState, new LinkedHashSet<State>());
 				rootState = newState;
 			} else {
-				/*String transition = MessageFormat.format(FSMConstants.TRANSITION, previousState.toString(), newState.toString());
-				this.transitionsCount.merge(transition, 1, Integer::sum);*/
 				seqStates.add(newState);
 				states.get(previousState).add(newState);
 				if (!states.containsKey(newState))
@@ -144,7 +141,6 @@ public abstract class Monitor implements Runnable {
 		if (Event.abbreviations == null)
 			return null;
 		for (Map.Entry<String, String> entry : Event.abbreviations.entrySet()) {
-			//System.out.println(entry.getKey()+" "+entry.getValue());
 			if (entry.getValue().equals(value))
 				return entry.getKey();
 		}
@@ -184,19 +180,11 @@ public abstract class Monitor implements Runnable {
 		boolean valid = true;
 		
 		State nextState = null;  // BJ: there must be a next state
-		System.out.println("check size "+states.size()+" "+states.keySet().toString()+" "+root.getVector().keySet());
-		System.out.println(states.values().toString());
-		System.out.println("valueexp "+root.getStatus().name()+" "+root.getVector().keySet()+" "+root.getVector().values());
-		
-		/*if(seqStates.size()>1) {
-			System.out.println("hello "+seqStates.get(0));
-			nextState = seqStates.get(1);
-		}*/
+
 		for (State n : states.get(root)) {
 			nextState = n;
 			break;
 		}
-		System.out.println("nextState "+nextState.getVector().keySet()+" "+nextState.getVector().values());
 		Context thisContext = new Context(root, nextState, states); // nextState was null here and below
 		if(expressions.get(0) instanceof EExpression)thisContext = new Context(root, nextState, states,true);
 		

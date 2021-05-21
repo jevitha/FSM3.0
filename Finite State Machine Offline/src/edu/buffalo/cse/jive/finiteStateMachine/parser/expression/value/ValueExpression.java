@@ -31,7 +31,6 @@ public abstract class ValueExpression extends Expression implements Comparable<V
 
 	public void setValue(Object value) {
 		this.value = value;
-		//System.out.println(this.value);
 	}
 
 	@Override

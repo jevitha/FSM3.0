@@ -20,9 +20,7 @@ public class EqualityExpression extends RelationalExpression {
 	public Boolean evaluate(Context context) {
 		getExpressionA().evaluate(context);
 		getExpressionB().evaluate(context);
-		System.out.println("eq "+getExpressionA().getValue().toString());
-		System.out.println("eq "+getExpressionB().getValue().toString());
-		Pair<Boolean, Boolean> pair =  FSMUtil.check(getExpressionA().getValue(), getExpressionB().getValue(),"=");
+		Pair<Boolean, Boolean> pair =  FSMUtil.validateStateAbstraction(getExpressionA().getValue(), getExpressionB().getValue(),"=");
 		if(pair.getLeft())
 			return pair.getRight();
 		

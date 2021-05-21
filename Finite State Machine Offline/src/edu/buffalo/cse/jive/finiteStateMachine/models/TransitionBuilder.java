@@ -34,7 +34,6 @@ public class TransitionBuilder {
 	private LinkedHashMap<String,Integer> transitionsCount;
 	private State rootState;
 	private int count;
-	//private Map<State, Set<State>> states;
 	private boolean isTransitionCountEnabled;
 	List<State> seqStates; // Sequence of original states
 
@@ -43,7 +42,6 @@ public class TransitionBuilder {
 		this.transitions.append(FSMConstants.START_UML+FSMConstants.NEW_LINE);
 		this.rootState = rootState;
 		this.count = count;
-		//this.states = states;
 		this.isTransitionCountEnabled = isTransitionCountEnabled;
 		this.seqStates = seqStates;
 		this.transitionsCount = new LinkedHashMap<String,Integer>();
@@ -105,7 +103,6 @@ public class TransitionBuilder {
 	}
 
 	public void build() {
-		//addInitialState(seqStates.get(0), rootState.getStatus());//changed rootstate to seqstates.get(0)
 		addInitialState(rootState, rootState.getStatus());
 		buildTransitions(seqStates);
 	}

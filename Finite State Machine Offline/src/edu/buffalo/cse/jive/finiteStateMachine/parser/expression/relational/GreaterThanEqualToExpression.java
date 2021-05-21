@@ -24,9 +24,7 @@ public class GreaterThanEqualToExpression extends RelationalExpression {
 		getExpressionA().evaluate(context);
 		getExpressionB().evaluate(context);
 		
-		System.out.println("gte "+getExpressionA().getValue().toString());
-		System.out.println("gte "+getExpressionB().getValue().toString());
-		Pair<Boolean, Boolean> pair =  FSMUtil.check(getExpressionA().getValue(), getExpressionB().getValue(), ">=");
+		Pair<Boolean, Boolean> pair =  FSMUtil.validateStateAbstraction(getExpressionA().getValue(), getExpressionB().getValue(), ">=");
 		if(pair.getLeft())
 			return pair.getRight();
 		return getExpressionA().compareTo(getExpressionB()) >= 0;

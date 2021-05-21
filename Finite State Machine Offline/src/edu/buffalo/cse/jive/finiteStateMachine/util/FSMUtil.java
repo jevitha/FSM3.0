@@ -221,7 +221,7 @@ public class FSMUtil {
 		return pair;
 	}
 	
-	public static Pair<Boolean, Boolean> check(Object value1, Object value2, String op) {
+	public static Pair<Boolean, Boolean> validateStateAbstraction(Object value1, Object value2, String op) {
 		
 		String val1Class = value1.getClass().getSimpleName();
 		String val2Class = value2.getClass().getSimpleName();
@@ -250,8 +250,6 @@ public class FSMUtil {
 				definitveObject = value1;
 				isFirst = true;
 			}
-			//String classType = definitveObject.getClass().getSimpleName();
-			
 			if(isFirst)
 				definitveObject = shiftOperator(op, definitveObject);
 			else 
@@ -263,12 +261,7 @@ public class FSMUtil {
 			double endA = range1.getEnd().doubleValue();
 			double startB = range2.getStart().doubleValue();
 			double endB = range2.getEnd().doubleValue();
-			System.out.println("range1 start "+startA);
-			System.out.println("range1 end "+endA);
-			System.out.println("range2 start "+startB);
-			System.out.println("range2 end "+endB);
-			System.out.println((startA>=startB && startA<=endB));
-			System.out.println((endA>=startB && endA<=endB));
+			
 			/*
 			 * the first if and else if, solves all the case for equal to and negation
 			 * r!=0 -> r=0 (else if case)
@@ -283,7 +276,6 @@ public class FSMUtil {
 					//state value is =0 and property is !=0
 					double excludeVal = range2.getExcludeValue().doubleValue();
 					if(startA==excludeVal || endA==excludeVal) {
-						System.out.println("yum");
 						propertyCheck = false;
 					}
 				}
@@ -292,7 +284,6 @@ public class FSMUtil {
 					double excludeVal1 = range1.getExcludeValue().doubleValue();
 					double excludeVal2 = range2.getExcludeValue().doubleValue();
 					if(excludeVal1 != excludeVal2) {
-						System.out.println("prop");
 						propertyCheck = false;
 					}
 				}
@@ -306,14 +297,12 @@ public class FSMUtil {
 			return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
 		}
 		else if(val1Class.equals("String") && val2Class.equals("String")) {
-			System.out.println("yup");
 			if(!value1.toString().contains("~") 
 					&& !value2.toString().contains("~"))
 			{
 				isAbstraction = Boolean.FALSE;
 				return new Pair<Boolean, Boolean>(isAbstraction, propertyCheck);
 			}
-			System.out.println("venu");
 			/*If abstraction is applied on string it will be 
 			=(this is usually ignored in state value) or !=(i.e ~)*/
 			String val1Str = value1.toString();

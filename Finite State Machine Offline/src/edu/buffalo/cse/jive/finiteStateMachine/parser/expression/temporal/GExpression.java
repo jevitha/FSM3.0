@@ -44,10 +44,8 @@ public class GExpression extends UnaryExpression<Expression> {
 	private Boolean evaluate(State prev, State curr, Set<State> visited, Map<State, Set<State>> states) {
 		boolean currentResult = true;
 		boolean invalidAbstraction = false;
-		System.out.println("evaluate");
 		if (!states.get(curr).isEmpty()) {
 			for (State next : states.get(curr)) {
-				System.out.println("before states "+curr.toString()+" "+next.toString());
 				try {
 					currentResult = getExpression().evaluate(new Context(curr, next, states)) && currentResult;
 				} catch(IllegalArgumentException ex) {
@@ -58,7 +56,6 @@ public class GExpression extends UnaryExpression<Expression> {
 			}
 		} 
 		//else { currentResult = getExpression().evaluate(new Context(curr, null, states)) && currentResult;}
-		System.out.println("wat status "+currentResult);
 		if(currentResult)
 			curr.setStatus(Status.VALID);
 		else {
@@ -68,7 +65,6 @@ public class GExpression extends UnaryExpression<Expression> {
 		}
 		if (visited.add(curr)) {
 			for (State next : states.get(curr)) {
-				System.out.println("states "+curr.toString()+" "+next.toString());
 				currentResult = evaluate(curr, next, visited, states) && currentResult;
 			}
 		}

@@ -31,7 +31,6 @@ public class VariableExpression extends ValueExpression
 
 	@Override
 	public Boolean evaluate(Context context) {
-		//System.out.println("aamam "+name);
 		setExpression(context.getCurrentState().getVector().get(name));
 		return true;
 	}
