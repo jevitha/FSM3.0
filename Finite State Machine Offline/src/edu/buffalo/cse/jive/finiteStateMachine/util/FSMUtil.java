@@ -269,8 +269,8 @@ public class FSMUtil {
 			 * r=0 -> r!=0 (if case)
 			 * r=0 -> r=0 (if case)
 			 */
-			if(((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) 
-					|| ((startB>=startA && startB<=endA) && (endB>=startA && endB<=endA))) {
+			if((startA>=startB && startA<=endB) && (endA>=startB && endA<=endB)) 
+					/*|| ((startB>=startA && startB<=endA) && (endB>=startA && endB<=endA)))*/ {
 				propertyCheck = true;
 				if(range1.getExcludeValue()==null && range2.getExcludeValue() != null) {
 					//state value is =0 and property is !=0
