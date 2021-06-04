@@ -51,7 +51,10 @@ public class GExpression extends UnaryExpression<Expression> {
 				} catch(IllegalArgumentException ex) {
 					invalidAbstraction = true;
 					currentResult = false;
-					FSMPropertyChecker.errorText.setText(ex.getMessage());
+					if(getExpression().getClass().getSimpleName().equals("NotExpression"))
+						currentResult = true;
+					else 
+						FSMPropertyChecker.errorText.setText(ex.getMessage());
 				}
 			}
 		} 
