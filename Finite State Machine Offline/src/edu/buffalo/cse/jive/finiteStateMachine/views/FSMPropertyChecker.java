@@ -3,6 +3,8 @@ package edu.buffalo.cse.jive.finiteStateMachine.views;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,9 +92,12 @@ public class FSMPropertyChecker extends ViewPart {
 	private ScrolledComposite rootScrollComposite;
 	private Composite mainComposite;
 	private Label fileLabel;
+	private Label propertyFileLabel;
 	private Text fileText;
+	private Text propertyFileText;
 	private Combo attributeList;
 	private Button browseButton;
+	private Button propertyButton;
 	private Button validateButton;
 	private Button exportButton;
 	private Composite imageComposite;
@@ -319,6 +324,24 @@ public class FSMPropertyChecker extends ViewPart {
 				+ "[a:b:..:c] or left empty, e.g., =5,,>3,[2:5:8],#true,<4.17,=str");
 		// Predicate abstraction
 		
+		//Browse property
+		Composite browseProperty = new Composite(mainComposite, SWT.NONE);
+		browseProperty.setLayout(new GridLayout(5, false));
+		browseProperty.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		propertyButton = new Button(browseProperty, SWT.PUSH);
+		propertyButton.setText("Load Property");
+
+		propertyFileLabel = new Label(browseProperty, SWT.FILL);
+		propertyFileLabel.setText("Property File : ");
+
+		propertyFileText = new Text(browseProperty, SWT.READ_ONLY);
+		propertyFileText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_GRAY));
+		GridData propertyGd = new GridData();
+		propertyGd.widthHint = 550;
+		propertyFileText.setLayoutData(propertyGd);
+		//Browse property
+		
 		Composite grammarView = new Composite(mainComposite, SWT.NONE);
 		grammarView.setLayout(new GridLayout(3, false));
 		grammarView.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -418,6 +441,14 @@ public class FSMPropertyChecker extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseButtonAction(e);
+			}
+		});
+		
+		propertyButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				loadPropertyButtonAction(e);
 			}
 		});
 
@@ -661,6 +692,32 @@ public class FSMPropertyChecker extends ViewPart {
 		statusLineManager.setMessage("Loaded " + fileName);
 	}
 
+	/**
+	 * Reads property file and loads in the property text area
+	 */
+	private void loadPropertyButtonAction(SelectionEvent e){
+		statusLineManager.setMessage(null);
+		FileDialog fd = new FileDialog(new Shell(Display.getCurrent(), SWT.OPEN));
+		fd.setText("Open txt File");
+		String[] filterExtensions = { "*.txt" };
+		fd.setFilterExtensions(filterExtensions);
+
+		String fileName = fd.open();
+		if (fileName == null)
+			return;
+		propertyFileText.setText(fileName);
+		try {
+			String content = Files.readString(Path.of(fileName));
+			System.out.println(content);
+			propertyText.setText(content);
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
+		}
+		statusLineManager.setMessage("Loaded " + fileName);
+	}
+	
 	/**
 	 * Exports the state machine into an svg file
 	 * 
