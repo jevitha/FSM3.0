@@ -677,6 +677,7 @@ public class FSMPropertyChecker extends ViewPart {
 		attributeList.removeAll();
 		kvText.setText("");
 		paText.setText("");
+		absText.setText("");
 		propertyText.setText("");
 		errorText.setText("                                                                ");
 		monitor = null;
@@ -696,6 +697,13 @@ public class FSMPropertyChecker extends ViewPart {
 	 * Reads property file and loads in the property text area
 	 */
 	private void loadPropertyButtonAction(SelectionEvent e){
+		if (image != null) {
+			if (!image.isDisposed()) {
+				System.out.println("Image disposedx");
+				image.dispose();
+			}
+		}
+		
 		statusLineManager.setMessage(null);
 		FileDialog fd = new FileDialog(new Shell(Display.getCurrent(), SWT.OPEN));
 		fd.setText("Open txt File");
@@ -708,7 +716,7 @@ public class FSMPropertyChecker extends ViewPart {
 		propertyFileText.setText(fileName);
 		try {
 			String content = Files.readString(Path.of(fileName));
-			System.out.println(content);
+			System.out.println("Property Content : \n"+content);
 			propertyText.setText(content);
 		}
 		catch(IOException ex)
@@ -802,6 +810,12 @@ public class FSMPropertyChecker extends ViewPart {
 	    Matcher m = p.matcher(propertyText.getText()); 
 	    if(m.find()) {
 	    	throw new IllegalArgumentException("The primed variable inside Property is not compatible with Abstraction");
+	    }
+	    
+	    p = Pattern.compile(FSMConstants.OR_REGEX);
+	    m = p.matcher(propertyText.getText()); 
+	    if(m.find()) {
+	    	throw new IllegalArgumentException("Property checking with abstraction : Replace OR expression with AND");
 	    }
 		
 		String[] paEntries = paStr.split(",");

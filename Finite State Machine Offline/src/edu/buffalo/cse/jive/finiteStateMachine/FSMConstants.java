@@ -36,7 +36,9 @@ public class FSMConstants {
 	public static final String END_UML = "@enduml";
 	
 	//public static final String REGEX = "[a-zA-Z']+\\s*(>|<|>=|<=|==)\\s*[a-zA-Z']+";
-	public static final String REGEX = "([\\w+]+[']\\s*(>|<|>=|<=|==|!=)\\s*)|(\\s*(>|<|>=|<=|==|!=)\\s*[\\w+]+['])";
+	public static final String REGEX = "([\\w+]+[']\\s*(>=|<=|>|<|==|=|!=)\\s*)|(\\s*(>|<|>=|<=|==|!=)\\s*[\\w+]+['])";
+	
+	public static final String OR_REGEX = "[\\w+]\\s*(>=|<=|<|>|==|=|!=)\\s*[\\w+]\\s*[\\|]+\\s*[\\w+]\\s*(>=|<=|<|>|==|=|!=)\\s*[\\w+]";
 	
 	public static final String INVALID_ABSTRACTION_MSG = "Property checking is not applicable for this abstraction. See states colored orange.";
 	
