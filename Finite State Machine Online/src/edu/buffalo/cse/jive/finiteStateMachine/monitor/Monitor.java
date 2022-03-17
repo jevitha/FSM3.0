@@ -156,9 +156,12 @@ public abstract class Monitor implements Runnable {
 	 */
 	public boolean validate(List<Expression> expressions) throws Exception {
 		boolean result = validate(rootState, expressions);
-		if(result && expressions.get(0) instanceof EExpression && TemporaryDataTransporter.shouldHighlight)rootState.setStatus(Status.MARKED);
-		else if(result)rootState.setStatus(Status.VALID);
-		else rootState.setStatus(Status.INVALID);
+		if(result && expressions.get(0) instanceof EExpression && TemporaryDataTransporter.shouldHighlight)
+			rootState.setStatus(Status.MARKED);
+		else if(result)
+			rootState.setStatus(Status.VALID);
+		else 
+			rootState.setStatus(Status.INVALID);
 		return result;
 	}
 
@@ -190,6 +193,8 @@ public abstract class Monitor implements Runnable {
 		
 		for (Expression expression : expressions) {
 			valid = expression.evaluate(thisContext) && valid;
+			if(!valid)
+			    System.out.println("Verification failed for expression : " + expression.toString());
 		}
 		
 		return valid;

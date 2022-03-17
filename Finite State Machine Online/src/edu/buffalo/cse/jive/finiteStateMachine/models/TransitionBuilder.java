@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State.Status;
 import edu.buffalo.cse.jive.finiteStateMachine.util.Pair;
@@ -103,8 +107,18 @@ public class TransitionBuilder {
 	}
 
 	public void build() {
+		if(rootState != null) {
 		addInitialState(rootState, rootState.getStatus());
 		buildTransitions(seqStates);
+		}
+		else {
+			System.err.println("Root State is null. "
+					+ "This might be caused when there are no JIVE events available."
+					+ "Please select JIVE events file or listen on port for events. ");
+			
+			return;
+			
+		}
 	}
 	
 	private void addTransitionCount(String transition, int count) {

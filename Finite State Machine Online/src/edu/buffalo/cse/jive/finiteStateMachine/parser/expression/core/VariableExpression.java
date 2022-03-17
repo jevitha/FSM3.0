@@ -47,6 +47,9 @@ public class VariableExpression extends ValueExpression
 
 	@Override
 	public Object getValue() {
-		return getExpression().getValue();
+		if(getExpression() != null)
+			return getExpression().getValue();
+		else
+			return null;
 	}
 }

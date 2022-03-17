@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Finite_State_Machine_Offline
-Bundle-SymbolicName: Finite_State_Machine_Offline;singleton:=true
+Bundle-SymbolicName: Finite_State_Machine_Online;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: edu.buffalo.cse.jive.finiteStateMachine.Activator
 Require-Bundle: org.eclipse.ui,

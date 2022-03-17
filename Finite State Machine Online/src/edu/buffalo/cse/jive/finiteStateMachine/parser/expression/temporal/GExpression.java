@@ -53,8 +53,11 @@ public class GExpression extends UnaryExpression<Expression> {
 					currentResult = false;
 					if(getExpression().getClass().getSimpleName().equals("NotExpression"))
 						currentResult = true;
-					else 
-						FSMPropertyChecker.errorText.setText(ex.getMessage());
+					else {
+//						FSMPropertyChecker.errorText.setText(ex.getMessage());
+						System.err.println(ex.getMessage());
+					}
+						
 				}
 			}
 		} 
