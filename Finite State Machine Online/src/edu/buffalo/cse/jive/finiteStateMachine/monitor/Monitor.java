@@ -34,6 +34,7 @@ public abstract class Monitor implements Runnable {
 	private State rootState;
 	private State previousState;
 	private boolean shouldConsolidateByMethod;
+	private boolean dataAbstraction;
 	private Map<String, State> consolidatedStateMap;
 	private LinkedHashMap<String,Integer> transitionsCount;
 
@@ -44,10 +45,12 @@ public abstract class Monitor implements Runnable {
 	 * @param source
 	 * @param shouldConsolidateByMethod 
 	 */
-	public Monitor(Set<String> keyFields, BlockingQueue<Event> source, boolean shouldConsolidateByMethod) {
+	public Monitor(Set<String> keyFields, BlockingQueue<Event> source, boolean shouldConsolidateByMethod,
+															boolean dataAbstraction) {
 		this.keyFields = keyFields;
 		this.source = source;
 		this.shouldConsolidateByMethod = shouldConsolidateByMethod;
+		this.dataAbstraction = dataAbstraction;
 		this.states = new HashMap<State, Set<State>>();
 		this.transitionsCount = new LinkedHashMap<String,Integer>();
 		this.consolidatedStateMap = new LinkedHashMap<String, State>();
@@ -83,6 +86,7 @@ public abstract class Monitor implements Runnable {
 				rootState = newState;
 			}
 			previousState = newState;
+			//result = true;
 		}
 		return result;
 	}
@@ -155,13 +159,16 @@ public abstract class Monitor implements Runnable {
 	 * @throws Exception
 	 */
 	public boolean validate(List<Expression> expressions) throws Exception {
+//		boolean flag_invalid = false; //fix to remove the green mark on root state if property failed atleast once - jevitha
 		boolean result = validate(rootState, expressions);
 		if(result && expressions.get(0) instanceof EExpression && TemporaryDataTransporter.shouldHighlight)
 			rootState.setStatus(Status.MARKED);
-		else if(result)
+		else if(result)// && !flag_invalid)
 			rootState.setStatus(Status.VALID);
-		else 
+		else {
 			rootState.setStatus(Status.INVALID);
+//			flag_invalid = true;
+		}
 		return result;
 	}
 
@@ -194,7 +201,7 @@ public abstract class Monitor implements Runnable {
 		for (Expression expression : expressions) {
 			valid = expression.evaluate(thisContext) && valid;
 			if(!valid)
-			    System.out.println("Verification failed for expression : " + expression.toString());
+			    System.err.println("Verification failed for expression : " + expression.toString());
 		}
 		
 		return valid;

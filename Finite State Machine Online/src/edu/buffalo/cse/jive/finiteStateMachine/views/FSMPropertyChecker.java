@@ -39,6 +39,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -94,6 +95,8 @@ import edu.buffalo.cse.jive.finiteStateMachine.util.TemporaryDataTransporter;
 // import edu.buffalo.cse.jive.finiteStateMachine.views.FSMAbstractionGranularity.State;
 import edu.buffalo.cse.jive.finiteStateMachine.models.State;
 import edu.buffalo.cse.jive.finiteStateMachine.monitor.OnlineMonitor;
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
 
 /**
@@ -109,7 +112,8 @@ import net.sourceforge.plantuml.SourceStringReader;
  * The view of the FSM.
  *
  */
-public class FSMPropertyChecker {//extends ViewPart {
+public class FSMPropertyChecker extends ViewPart {
+//public class FSMPropertyChecker {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -181,7 +185,12 @@ public class FSMPropertyChecker {//extends ViewPart {
 
 	private Button[] granularity;
 	private Label grLabel;
+	
+	private Button[] abstractionType;
+	private Label absTypeLabel;
 
+	private boolean dataAbstraction = true;
+	
 	//	private Job job;
 	//	private ServerSocket server;
 	/*
@@ -192,19 +201,22 @@ public class FSMPropertyChecker {//extends ViewPart {
 
 	private NetworkEventParser networkEventParser;
 	*/
-	public FSMPropertyChecker() {
-	}
 	//inserted by jevitha
-	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		shell.setText("JIVE Property Checker");
+	// uncomment the below constructor and main funciton lines to enable stand-alone version of property checker 
+	//public FSMPropertyChecker() {
+
+	//public static void main(String[] args) {
+	public void createIntegratedPartControl(Composite parent) {
+//		Display display = new Display(); // uncomment this line for stand-alone version
+		display = parent.getDisplay(); // comment this line for stand-alone version
+//		Shell shell = new Shell(display);
+//		shell.setLayout(new FillLayout());
+//		shell.setText("JIVE Property Checker");
 		
 //		final TabFolder tabFolder = new TabFolder(shell, SWT.BORDER|SWT.BOTTOM);
 		
-		final TabFolder tabFolder = new TabFolder(shell, SWT.BORDER);
-		
+	//	final TabFolder tabFolder = new TabFolder(shell, SWT.BORDER);
+		final TabFolder tabFolder = new TabFolder(parent, SWT.BORDER);
 		TabItem item = new TabItem(tabFolder, SWT.NONE);
 		item.setText("Offline Verification");
 		item.setToolTipText("This tab provides options for Offline Verification using JIVE Events log file ");
@@ -218,19 +230,21 @@ public class FSMPropertyChecker {//extends ViewPart {
 		item1.setControl(onlineComposite);
 		tabFolder.setSelection(item1);
 		
-		FSMPropertyChecker fsm = new FSMPropertyChecker();
-		fsm.createPartControl(offlineComposite);
-		fsm.createOnlineControl(onlineComposite);
+		createOfflineControl(offlineComposite);
+		createOnlineControl(onlineComposite);
+//		FSMPropertyChecker fsm = new FSMPropertyChecker();
+//		fsm.createOfflineControl(offlineComposite);
+//		fsm.createOnlineControl(onlineComposite);
 		
-		shell.setSize(800,600);
-		shell.pack();
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		display.dispose();
+//		shell.setSize(800,600);
+//		shell.pack();
+//		shell.open();
+//		while (!shell.isDisposed()) {
+//			if (!display.readAndDispatch()) {
+//				display.sleep();
+//			}
+//		}
+//		display.dispose();
 	}
 
 	private void createOnlineControl(Composite onlineComposite) {
@@ -242,7 +256,11 @@ public class FSMPropertyChecker {//extends ViewPart {
 	 * It's Eclipse SWT 3.x! Deal with it. As I did :D
 	 */
 	public void createPartControl(Composite parent) {
-
+		createIntegratedPartControl(parent);
+		
+	}
+	
+	public void createOfflineControl(Composite parent) {
 		//statusLineManager = getViewSite().getActionBars().getStatusLineManager();
 		statusLineManager = new StatusLineManager();
 		display = parent.getDisplay();
@@ -292,7 +310,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 		browseComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		browseButton = new Button(browseComposite, SWT.PUSH);
-		browseButton.setText("Browse");
+		browseButton.setText("Browse ");
 
 		fileLabel = new Label(browseComposite, SWT.FILL);
 		fileLabel.setText("CSV File : ");
@@ -414,7 +432,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 		transitionCount = new Button(grComposite, SWT.CHECK);
 		transitionCount.setSelection(true);
 		transitionCount.setText("Count transitions");
-
+		
 		Composite paComposite = new Composite(mainComposite, SWT.NONE);
 		paComposite.setLayout(new GridLayout(2, false));
 		paComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -426,6 +444,25 @@ public class FSMPropertyChecker {//extends ViewPart {
 		GridData gd5b = new GridData();
 		gd5b.widthHint = 800;
 		paText.setLayoutData(gd5b);
+		
+		// Abstraction composite
+		Composite absComposite = new Composite(mainComposite, SWT.NONE);
+		absComposite.setLayout(new GridLayout(5, false));
+		absComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		absTypeLabel = new Label(absComposite, SWT.FILL);
+		absTypeLabel.setText("Abstraction Type");
+						
+		abstractionType = new Button[2];
+
+		abstractionType[0] = new Button(absComposite, SWT.RADIO);
+		abstractionType[0].setSelection(true);
+		abstractionType[0].setText("Data");
+						
+
+		abstractionType[1] = new Button(absComposite, SWT.RADIO);
+		abstractionType[1].setSelection(false);
+		abstractionType[1].setText("Path");
 
 		// Predicate abstraction
 		Composite abstractComposite = new Composite(mainComposite, SWT.NONE);
@@ -433,7 +470,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 		abstractComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		absLabel = new Label(abstractComposite, SWT.FILL);
-		absLabel.setText("Abstraction");
+		absLabel.setText("Abstraction Criteria");
 
 		absText = new Text(abstractComposite, SWT.BORDER|SWT.FILL);
 		GridData absGd = new GridData();
@@ -565,6 +602,41 @@ public class FSMPropertyChecker {//extends ViewPart {
 		validateButton.setEnabled(false);
 		exportButton.setEnabled(false);
 
+		abstractionType[0].addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if(dataAbstraction == false) {
+					dataAbstraction = true;
+//					System.out.println("Data abstraction : "+dataAbstraction);
+				}
+				
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				
+			}
+			
+		});
+		
+		abstractionType[1].addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if(dataAbstraction == true) {
+					dataAbstraction = false;
+//					System.out.println("Data abstraction : "+dataAbstraction);		
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		
 		validateButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -778,7 +850,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 //				e3.printStackTrace();
 			}
 			if (expressions != null && expressions.size() > 0) {
-				monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
+				monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection(), dataAbstraction);
 				monitor.run();
 				abstraction();
 
@@ -789,6 +861,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 
 				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 				transitionBuilder.build();
+				System.out.println(transitionBuilder.getTransitions());
 				svgGenerator.generate(transitionBuilder.getTransitions());
 				exportButton.setEnabled(true);
 			}
@@ -1080,16 +1153,24 @@ public class FSMPropertyChecker {//extends ViewPart {
 		SourceStringReader reader = new SourceStringReader(transitionBuilder.getTransitions());
 		FileDialog fd = new FileDialog(new Shell(Display.getCurrent()), SWT.SAVE);
 		fd.setText("Export As");
-		String[] filterExtensions = { "*.svg" };
+		String[] filterExtensions = { "*.svg", "*.png" };
 		fd.setFilterExtensions(filterExtensions);
 		String fileName = fd.open();
+		int extn = fd.getFilterIndex();
+		System.out.println("Filename:" +fileName);
+		System.out.println("Filter index:" + extn);
+		System.out.println("Filter index name:" + filterExtensions[extn]);
+
 		if (fileName != null) {
 			try {
 				//reader.outputImage(new File(fd.open()));
 				/*Updated by Jevitha
 				Updated from new File to new FileOutputStream due to error displayed
 				 */
-				reader.outputImage(new FileOutputStream(fd.open()));
+				if(fd.getFilterIndex() == 0)
+					reader.outputImage(new FileOutputStream(fileName), new FileFormatOption(FileFormat.SVG));
+				else
+					reader.outputImage(new FileOutputStream(fileName),new FileFormatOption(FileFormat.PNG));
 			} catch (FileNotFoundException e1) {
 				e1.printStackTrace();
 			} catch (IOException e1) {
@@ -1170,40 +1251,77 @@ public class FSMPropertyChecker {//extends ViewPart {
 		String[] paEntries = paStr.split(",");
 		boolean reductionFlag = false;
 		int s = 0;
+		
+		if(dataAbstraction) {
+			while (s<seqStates.size()) {
+				List<ValueExpression> valueList = new ArrayList<>(seqStates.get(s).getVector().values());
+				List<String> keyList = new ArrayList<>(seqStates.get(s).getVector().keySet());
 
-		while (s<seqStates.size()) {
-			List<ValueExpression> valueList = new ArrayList<>(seqStates.get(s).getVector().values());
-			List<String> keyList = new ArrayList<>(seqStates.get(s).getVector().keySet());
-			for (int k=0; k<paEntries.length && k<valueList.size(); k++) {
-				if ( !paEntries[k].trim().equals("") ) {
-					String absVal = FSMUtil.applyAbstraction(valueList.get(k).toString(), paEntries[k]);
-					if (absVal.equals("")) {
-						reductionFlag = true;
-						break;
-					}
-					else {
-						if(s!=0) {
-							Map<String, ValueExpression> map = seqStates.get(s).getVector();
-							map.put(keyList.get(k), new StringValueExpression(absVal));
-						} else {
-							State initial = seqStates.get(s).copy();
-							Map<String, ValueExpression> map = initial.getVector();
-							map.put(keyList.get(k), new StringValueExpression(absVal));
-							seqStates.set(0, initial);
-							//monitor.getRootState().getVector().put(keyList.get(k), new StringValueExpression(absVal));
+				for (int k=0; k<paEntries.length && k<valueList.size(); k++) {
+					if ( !paEntries[k].trim().equals("") ) {
+						String absVal = FSMUtil.applyAbstraction(valueList.get(k).toString(), paEntries[k]);
+						if (absVal.equals("")) {
+							reductionFlag = true;
+							break;
+						}
+						else {
+							if(s!=0) {
+								Map<String, ValueExpression> map = seqStates.get(s).getVector();
+								map.put(keyList.get(k), new StringValueExpression(absVal));
+							} else {
+								State initial = seqStates.get(s).copy();
+								Map<String, ValueExpression> map = initial.getVector();
+								map.put(keyList.get(k), new StringValueExpression(absVal));
+								seqStates.set(0, initial);
+								//monitor.getRootState().getVector().put(keyList.get(k), new StringValueExpression(absVal));
+							}
 						}
 					}
+				}	
+				if (reductionFlag) {
+					State hState = seqStates.get(s).copy();
+					//hState.hashed = true; //check this
+					seqStates.set(s, hState);
+					reductionFlag = false;
+					s++;
 				}
-			}	
-			if (reductionFlag) {
-				State hState = seqStates.get(s).copy();
-				//hState.hashed = true; //check this
-				seqStates.set(s, hState);
-				reductionFlag = false;
+				else
+					s++;
+			}
+			
+		}
+		else { // Path Abstraction - Jevitha 
+			
+			List<State> pathAbstSeqStates = new ArrayList<>();
+			//boolean startState = false;
+			while (s<seqStates.size()) {
+				List<ValueExpression> valueList = new ArrayList<>(seqStates.get(s).getVector().values());
+				List<String> keyList = new ArrayList<>(seqStates.get(s).getVector().keySet());
+
+				for (int k=0; k<paEntries.length; k++) {
+					if ( !paEntries[k].trim().equals("") && 
+							valueList.get(0).toString().equalsIgnoreCase(paEntries[k].trim()) ) {
+						
+						String absVal = paEntries[k].trim();
+						
+						//if(startState) {
+							//Map<String, ValueExpression> map = seqStates.get(s).getVector();
+							//map.put(keyList.get(0), new StringValueExpression(absVal));
+							pathAbstSeqStates.add(seqStates.get(s).copy());
+						/*} else {
+							State initial = seqStates.get(s).copy();
+							//Map<String, ValueExpression> map = initial.getVector();
+							//map.put(keyList.get(0), new StringValueExpression(absVal));
+							pathAbstSeqStates.add(initial);
+							startState = true;
+							//monitor.getRootState().getVector().put(keyList.get(k), new StringValueExpression(absVal));
+						}*/
+					}
+				}	
 				s++;
 			}
-			else
-				s++;
+			seqStates.retainAll(pathAbstSeqStates);
+
 		}
 		validateAbstractedState();
 	}
@@ -1212,7 +1330,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 		errorText.setText("                                                                ");
 		try {
 			Set<String> keyAttributes = readKeyAttributes(kvText, paText);
-			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
+			monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection(), dataAbstraction);
 			monitor.run();
 			System.out.println("Monitor Stats : "+monitor.getSeqState().size()+" "+monitor.getStates().size());
 			if(monitor.getStates().size() > 0) {
@@ -1220,6 +1338,7 @@ public class FSMPropertyChecker {//extends ViewPart {
 				abstraction();
 				transitionBuilder = new TransitionBuilder(monitor.getRootState(), monitor.getStates(), transitionCount.getSelection(), monitor.getSeqState(), count);
 				transitionBuilder.build();
+				System.out.println(transitionBuilder.getTransitions());
 				svgGenerator.generate(transitionBuilder.getTransitions());
 				statusLineManager.setMessage("Finite State Model for " + kvText.getText());
 				exportButton.setEnabled(true);
@@ -1310,8 +1429,8 @@ public class FSMPropertyChecker {//extends ViewPart {
 		nextButton.setEnabled(false); nextButton2.setEnabled(false);
 	}
 
-	//	@Override
-	//	public void setFocus() {
-	//
-	//	}
+		@Override
+		public void setFocus() {
+	
+		}
 }

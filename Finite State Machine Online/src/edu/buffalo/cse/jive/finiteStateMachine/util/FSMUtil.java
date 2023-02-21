@@ -222,9 +222,9 @@ public class FSMUtil {
 	}
 	
 	public static Pair<Boolean, Boolean> validateStateAbstraction(Object value1, Object value2, String op) {
-		
 		String val1Class = value1.getClass().getSimpleName();
 		String val2Class = value2.getClass().getSimpleName();
+		
 		
 		if(op.equals("!="))
 			op = "~"; // to be in sync with state operator for not equal to

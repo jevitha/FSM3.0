@@ -54,16 +54,16 @@ public class OnlineMonitor extends Monitor {
 	public OnlineMonitor(Set<String> keyFields, BlockingQueue<Event> source, 
 			String properties, String propAbstractions,
 			boolean countTransitions, SvgGenerator svgGenerator,
-			boolean view, boolean verify) {
+			boolean view, boolean verify, boolean dataAbstraction) {
 
-		super(keyFields, source, false);
+		super(keyFields, source, false, dataAbstraction);
 		this.propertyExprStr = properties;
 		this.propAbstrStr = propAbstractions;
 		this.countTransitions = countTransitions;
 		this.svgGenerator = svgGenerator;
 		this.doView = view;
 		this.doVerify = verify;
-
+		
 	}
 
 
@@ -101,22 +101,26 @@ public class OnlineMonitor extends Monitor {
 					}
 					try {
 						Event event = getSource().take();
-						//System.out.println("OnlineMonitor - run : "+event.toString());
-
+						System.out.println("OnlineMonitor - run : "+event.toString());
+						
 						stateAdded = buildStates(event);
-						System.out.println("OnlineMonitor - run : New state : "+ stateAdded);
+						if(stateAdded) System.out.println("OnlineMonitor - run : New state : "+ stateAdded);
 						int count = Integer.MAX_VALUE;
 						//abstraction();
 						if(stateAdded) {
+							//abstraction 
+							if (!propAbstrStr.equals("")) {
+								if(stateAdded)	System.out.println("OnlineMonitor - run : Invoking Abstraction");
+								abstraction();
+								
+							}
+
+							
 							if (expressions != null && expressions.size() > 0) {
 								//monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection());
 								//monitor.run();
 								
-								if (!propAbstrStr.equals("")) {
-									System.out.println("OnlineMonitor - run : Invoking Abstraction");
-									abstraction();
-								}
-
+								
 								//Online Verification
 								try {
 									if(doVerify == true) {
@@ -126,8 +130,8 @@ public class OnlineMonitor extends Monitor {
 
 										}
 										else {
-											System.out.println("OnlineMonitor - run : Property Violoated");
-											//									errorText.setText("Property Violated :                               ");
+											System.err.println("OnlineMonitor - run : Property Violated");
+//																				errorText.setText("Property Violated :                               ");
 										}
 									}
 
@@ -156,6 +160,9 @@ public class OnlineMonitor extends Monitor {
 		job.setUser(true);
 		job.schedule();
 	}
+
+
+
 
 	public void stopMonitoring() {
 		if(job != null)
@@ -258,6 +265,12 @@ public class OnlineMonitor extends Monitor {
 		}
 		validateAbstractedState();
 	}
+	
+	protected void pathAbstraction(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 	/**
 	 * Reads property text and parses them into a list of expressions
@@ -281,6 +294,11 @@ public class OnlineMonitor extends Monitor {
 		}
 		return exp;
 		//		throw new IllegalArgumentException("Please enter properties to validate");
+	}
+	
+	
+	public String getTransitionsForExport() {
+		return transitionBuilder.getTransitions();
 	}
 
 }

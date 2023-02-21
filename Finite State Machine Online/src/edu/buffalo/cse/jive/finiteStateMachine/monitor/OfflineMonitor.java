@@ -14,8 +14,9 @@ import edu.buffalo.cse.jive.finiteStateMachine.models.Event;
  */
 public class OfflineMonitor extends Monitor {
 
-	public OfflineMonitor(Set<String> keyFields, BlockingQueue<Event> source, boolean shouldConsolidateByMethod) {
-		super(keyFields, source, shouldConsolidateByMethod);
+	public OfflineMonitor(Set<String> keyFields, BlockingQueue<Event> source, 
+											boolean shouldConsolidateByMethod, boolean dataAbstraction) {
+		super(keyFields, source, shouldConsolidateByMethod, dataAbstraction);
 	}
 
 	@Override

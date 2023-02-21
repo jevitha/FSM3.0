@@ -193,6 +193,7 @@ class BF {
 	public BF(Lexer lexer) throws Exception {
 		Imply e;
 		Rel r;
+		
 		switch (lexer.getNextToken()) {
 		
 		case Token.FOR:    /*  FOR(N, Expr:Expr, Imply) */
@@ -396,6 +397,8 @@ class BF {
 				throw new IllegalArgumentException("Syntax Error in Properties");
 			lexer.lex(); // skip over [
 			e = new Imply(lexer);
+			//VariableExpression e4;
+			//e4 = new VariableExpression(lexer); // Changed by Jevitha from Imply to VariableExpression
 			if (lexer.getNextToken() == Token.LEADS_TO)  {
 				lexer.lex();
 				Imply e2 = new Imply(lexer);
@@ -524,6 +527,9 @@ class Rel { // relexp -> expr ('<' | '>' | '<=' | '>=' | '==' | '!= ' | 'in')
 					break;
 				}
 			}
+		}
+		else { //Added by Jevitha to fix P property having only Variable names instead of expression
+			expression = e1.getExpression();
 		}
 	}
 
