@@ -75,7 +75,7 @@ public class TransitionBuilder {
 	private String addTransition(State state1, State state2, Status status) {
 		StringBuilder transition = new StringBuilder(
 				MessageFormat.format(FSMConstants.TRANSITION, state1.toString(), state2.toString()));
-		addColorTransition(transition, FSMConstants.LIGHT_SKY_BLUE_COLOR);
+		
 		if (status.equals(Status.INVALID))
 			addColorTransition(transition, FSMConstants.RED_COLOR);
 		else if (status.equals(Status.VALID_A))
