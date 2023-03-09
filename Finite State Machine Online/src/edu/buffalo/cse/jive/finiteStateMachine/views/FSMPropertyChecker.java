@@ -593,6 +593,7 @@ public class FSMPropertyChecker extends ViewPart {
 		browserLData.heightHint = Integer.parseInt(vcanvasText.getText());
 		browser.setLayoutData(browserLData);
 		//browser.setText(svg);
+		browser.setText("");
 		imageComposite.pack();
 		rootScrollComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
