@@ -776,7 +776,11 @@ class Factor { // factor -> int_ | id | '(' expr ')' ************ list literal [
 		case Token.STRING_LIT: // id
 			id = lexer.getIdent();
 			lexer.lex();
-			expression = new StringValueExpression(id.substring(1, id.length() - 1));
+			if(id.length() > 1)
+				expression = new StringValueExpression(id.substring(1, id.length() - 1));
+			else
+				expression = new StringValueExpression(id);
+				
 			break;
 		case Token.LEFT_PAREN: // '('
 			lexer.lex();

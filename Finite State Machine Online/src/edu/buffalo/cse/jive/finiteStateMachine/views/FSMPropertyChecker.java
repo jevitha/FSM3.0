@@ -848,7 +848,7 @@ public class FSMPropertyChecker extends ViewPart {
 				expressions = parseExpressions(propertyText);
 			} catch (Exception e3) {
 				errorText.setText(e3.getMessage());
-//				e3.printStackTrace();
+				e3.printStackTrace();
 			}
 			if (expressions != null && expressions.size() > 0) {
 				monitor = new OfflineMonitor(keyAttributes, incomingEvents, granularity[1].getSelection(), dataAbstraction);
@@ -1260,7 +1260,7 @@ public class FSMPropertyChecker extends ViewPart {
 
 				for (int k=0; k<paEntries.length && k<valueList.size(); k++) {
 					if ( !paEntries[k].trim().equals("") ) {
-						String absVal = FSMUtil.applyAbstraction(valueList.get(k).toString(), paEntries[k]);
+						String absVal = FSMUtil.applyAbstraction(valueList.get(k).toString(), paEntries[k].trim());
 						if (absVal.equals("")) {
 							reductionFlag = true;
 							break;

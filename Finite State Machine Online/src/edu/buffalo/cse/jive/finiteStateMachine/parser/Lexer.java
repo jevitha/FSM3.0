@@ -270,7 +270,9 @@ public class Lexer {
 		do {
 			ident = ident + ch;
 			ch = buffer.getChar();
-		} while (Character.isLetter(ch) || Character.isDigit(ch) || Character.isWhitespace(ch) || ch == '_' || ch == '.' || ch == ':' || ch == '$' || ch == '[' || ch == ']');
+		} while (Character.isLetter(ch) || Character.isDigit(ch) || Character.isWhitespace(ch) 
+				|| ch == '_' || ch == '.' || ch == ':' || ch == '$' || ch == '[' || ch == ']'
+				|| ch == '>' || ch == '<' || ch == '=' || ch == '~'); // KPJ - included these to account for characters in abstract state
 		if(ch == '\"') {
 			ident = ident + ch;
 			ch = buffer.getChar();

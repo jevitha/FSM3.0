@@ -77,13 +77,13 @@ public class OnlineMonitor extends Monitor {
 				//monitor.beginTask("Monitoring Started", 10);
 				boolean stateAdded=false;
 
-				System.out.println("OnlineMonitor - run : Job Started : "+job.getName());
+//				System.out.println("OnlineMonitor - run : Job Started : "+job.getName());
 				//jevitha
 				while(getSource().isEmpty()) {
-					System.out.println("OnlineMonitor - run :  Waiting for events");
+//					System.out.println("OnlineMonitor - run :  Waiting for events");
 
 					if (monitor.isCanceled())  {
-						System.out.println("OnlineMonitor - run :  Job Cancelled : "+ job.getName());
+//						System.out.println("OnlineMonitor - run :  Job Cancelled : "+ job.getName());
 						return Status.CANCEL_STATUS;
 					}
 
@@ -101,16 +101,16 @@ public class OnlineMonitor extends Monitor {
 					}
 					try {
 						Event event = getSource().take();
-						System.out.println("OnlineMonitor - run : "+event.toString());
+//						System.out.println("OnlineMonitor - run : "+event.toString());
 						
 						stateAdded = buildStates(event);
-						if(stateAdded) System.out.println("OnlineMonitor - run : New state : "+ stateAdded);
+//						if(stateAdded) System.out.println("OnlineMonitor - run : New state : "+ stateAdded);
 						int count = Integer.MAX_VALUE;
 						//abstraction();
 						if(stateAdded) {
 							//abstraction 
 							if (!propAbstrStr.equals("")) {
-								if(stateAdded)	System.out.println("OnlineMonitor - run : Invoking Abstraction");
+//								if(stateAdded)	System.out.println("OnlineMonitor - run : Invoking Abstraction");
 								abstraction();
 								
 							}

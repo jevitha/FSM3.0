@@ -70,6 +70,10 @@ public class TransitionBuilder {
 
 	public String getTransitions() {
 		return new StringBuilder(transitions).append(FSMConstants.END_UML+FSMConstants.NEW_LINE).toString();
+//		StringBuilder sb = new StringBuilder(transitions).deleteCharAt(transitions.length()-1);
+//		return sb.append(FSMConstants.SPACE_HASH+FSMConstants.LIGHT_SKY_BLUE_COLOR+FSMConstants.NEW_LINE+FSMConstants.END_UML+FSMConstants.NEW_LINE).toString();
+		
+		
 	}
 
 	private String addTransition(State state1, State state2, Status status) {

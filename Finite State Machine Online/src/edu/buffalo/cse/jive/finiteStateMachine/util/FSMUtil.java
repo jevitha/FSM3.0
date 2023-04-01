@@ -1,5 +1,7 @@
 package edu.buffalo.cse.jive.finiteStateMachine.util;
 
+import java.math.BigDecimal;
+
 import edu.buffalo.cse.jive.finiteStateMachine.FSMConstants;
 
 /*
@@ -34,25 +36,29 @@ public class FSMUtil {
 		case 0:	// Integer
 			int n = Integer.parseInt(predicate.substring(1).trim());
 			if (predicate.trim().startsWith("<")) { // <n
-				if ( Integer.parseInt(value) < n ) 
+//				if ( Integer.parseInt(value) < n )
+				if(((Double)Double.parseDouble(value)).intValue() < n) // if value is double and predicate is int
 					return "<" + n;
 				else
 					return ">=" + n;
 			}
 			else if (predicate.trim().startsWith(">")) { // >n
-				if ( Integer.parseInt(value) > n ) 
+//				if ( Integer.parseInt(value) > n )
+				if(((Double)Double.parseDouble(value)).intValue() > n)
 					return ">" + n;
 				else
 					return "<=" + n;
 			}
 			else if (predicate.trim().startsWith("=")) { // =n
-				if ( Integer.parseInt(value) == n ) 
+//				if ( Integer.parseInt(value) == n )
+				if(((Double)Double.parseDouble(value)).intValue() == n)
 					return "" + n;
 				else
 					return "~" + n;
 			}			
 			else if (predicate.trim().startsWith("~")) { // ~n
-				if ( Integer.parseInt(value) != n ) 
+//				if ( Integer.parseInt(value) != n )
+				if(((Double)Double.parseDouble(value)).intValue() != n)
 					return "~" + n;
 				else
 					return "" + n;
@@ -89,17 +95,34 @@ public class FSMUtil {
 			
 		case 2: // Range abstraction
 			String[] range = predicate.substring(1, predicate.indexOf(']')).split(":");
+			//final double epsilon = .0001;
 			try {
+				BigDecimal bdValue = null;
+				if(value.matches("^[0-9]+.[0-9]+$")) { // convert decimal to int or do comparisons based on int
+					bdValue = new BigDecimal(value);
+//					value = String.valueOf(bdValue.intValue());
+					if (bdValue.doubleValue() < Integer.parseInt(range[0]))
+						return "<" + Integer.parseInt(range[0]);
+					for (int i=0; i < range.length-1; i++) {
+						if ( bdValue.doubleValue() >= Integer.parseInt(range[i])
+								&& bdValue.doubleValue() < Integer.parseInt(range[i+1]))
+							return Integer.parseInt(range[i]) + ":" + Integer.parseInt(range[i+1]);
+					}
+					if (bdValue.doubleValue() >= Integer.parseInt(range[range.length-1]))
+						return ">=" + Integer.parseInt(range[range.length-1]);
+				}
+				else {
 				if (Integer.parseInt(value) < Integer.parseInt(range[0]))
 					return "<" + Integer.parseInt(range[0]);
 				for (int i=0; i < range.length-1; i++) {
 					if ( Integer.parseInt(value) >= Integer.parseInt(range[i])
-						&& Integer.parseInt(value) < Integer.parseInt(range[i+1])
-					)
-					return Integer.parseInt(range[i]) + ":" + Integer.parseInt(range[i+1]);
+							&& Integer.parseInt(value) < Integer.parseInt(range[i+1]))
+						return Integer.parseInt(range[i]) + ":" + Integer.parseInt(range[i+1]);
 				}
 				if (Integer.parseInt(value) >= Integer.parseInt(range[range.length-1]))
 					return ">=" + Integer.parseInt(range[range.length-1]);
+				}
+				
 			}
 			catch(NumberFormatException nfe) {
 				return value;
